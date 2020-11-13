@@ -1,13 +1,19 @@
 #include "scenegraphnode.h"
 
-SceneGraphNode::SceneGraphNode()
+objectType SceneGraphNode::getType() const
 {
-
+    return type;
 }
 
-SceneGraphNode::SceneGraphNode(SceneGraphNode *parent)
+SceneGraphNode::SceneGraphNode()
+{
+    this->type = DEFAULT;
+}
+
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, objectType type)
 {
     this->parent = parent;
+    this->type = type;
 }
 
 void SceneGraphNode::setTransform(Transform t)

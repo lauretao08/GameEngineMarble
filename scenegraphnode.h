@@ -8,6 +8,7 @@
 
 using namespace std;
 
+enum objectType {SPHERE, CUBE, DEFAULT};
 
 #ifndef SCENEGRAPHNODE_H
 #define SCENEGRAPHNODE_H
@@ -18,13 +19,13 @@ class SceneGraphNode
 
 private:
     SceneGraphNode* parent;
-
     Transform transform;
+    objectType type;
 
 public:
     SceneGraphNode();
 
-    SceneGraphNode(SceneGraphNode* parent);
+    SceneGraphNode(SceneGraphNode* parent, objectType type);
 
     void setTransform(Transform t);
 
@@ -33,6 +34,7 @@ public:
     SceneGraphNode *getParent();
 
 
+    objectType getType() const;
 };
 
 #endif // SCENEGRAPHNODE_H

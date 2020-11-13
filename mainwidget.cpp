@@ -198,22 +198,13 @@ void MainWidget::initializeGL()
     scene = SceneGraph();
 
     SceneGraphNode root = SceneGraphNode();
-    root.setTransform(Transform( QVector3D(0.0,-0.5,0.0) , QVector3D(0.8,0.8,0.8) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    root.setTransform(Transform( QVector3D(0.0,-1.0,0.0) , QVector3D(0.5,0.5,0.5) , QQuaternion(0.0,0.0,0.0,0.0) ));
     scene.AddRoot(root,&root);
 
-    SceneGraphNode earth = SceneGraphNode(&root);
-    earth.setTransform(Transform( QVector3D(3.0,0.0,0.0) , QVector3D(0.4,0.4,0.4) , QQuaternion::fromEulerAngles(0.0,0.0,20.0) ));
+    SceneGraphNode earth = SceneGraphNode(&root, objectType::SPHERE);
+    earth.setTransform(Transform( QVector3D(0.0,2.0,0.0) , QVector3D(1.0,1.0,1.0) , QQuaternion(0.0,0.0,0.0,0.0) ));
 
     scene.AddNode(earth,&earth);
-
-    SceneGraphNode moon = SceneGraphNode(&earth);
-    moon.setTransform(Transform( QVector3D(3.0,0.0,0.0) , QVector3D(0.2,0.2,0.2) , QQuaternion(0.0,0.0,0.0,0.0) ));
-
-    scene.AddNode(moon,&moon);
-
-
-
-    //scene.displaySceneElements(&program,geometries,projection, rotation);
 
 
 
@@ -312,7 +303,7 @@ void MainWidget::paintGL()
 
     // Use texture unit 0 which contains cube.png
     program.setUniformValue("texture", 0);
-
+/*
     float p,y,r;
     rotation.getEulerAngles(&p,&y,&r);
 
@@ -323,6 +314,7 @@ void MainWidget::paintGL()
     scene.addRotation(0,rotation);
     scene.addRotation(1,r2);
     scene.addRotation(2,r3);
+    */
     scene.displaySceneElements(&program, geometries ,projection, rotation);
 
     /*heightMap->bind(1);

@@ -44,7 +44,7 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
     //QQuaternion rotation;
     //QMatrix4x4 projection;
     //matrix.translate(0.0, 0.0, -5.0);
-    matrix.rotate(rotation);
+    //matrix.rotate(rotation);
 
 
 
@@ -62,8 +62,19 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
         // Set modelview-projection matrix
         program->setUniformValue("mvp_matrix", projection * matrix);
 
+        switch (current.getType()) {
+            case objectType::CUBE :
+                geometries->drawCubeGeometry(program);
+                break;
+            case objectType::SPHERE :
+                geometries->drawObjGeometry(program);
+                break;
+            case objectType::DEFAULT :
+                geometries->drawCubeGeometry(program);
+                break;
+            default : break;
+        }
 
-        geometries->drawCubeGeometry(program);
 
 
         for(int i=0;i<graph.size();i++){

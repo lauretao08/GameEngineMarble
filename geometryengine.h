@@ -55,6 +55,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
 #include <string>
+#include <vector>
 
 class GeometryEngine : protected QOpenGLFunctions_3_1
 {
@@ -63,16 +64,24 @@ public:
     virtual ~GeometryEngine();
 
     void drawCubeGeometry(QOpenGLShaderProgram *program);
-    void drawOFFGeometry(QOpenGLShaderProgram *program);
+    void drawObjGeometry(QOpenGLShaderProgram *program);
     void drawPlaneGeometry(QOpenGLShaderProgram *program, int size);
+
+    int getGeometryObjectID() const;
+    void setGeometryObjectID(int value);
 
 private:
     void initCubeGeometry();
-    void initOFFGeometry(std::string filename);
+    void initObjGeometry(std::string filename);
     void initPlaneGeometry(int size);
 
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;
+    int GeometryObjectID;
+    std::vector<QOpenGLBuffer> arrayBufs;
+    std::vector<QOpenGLBuffer> indexBufs;
+
+    int IndexSize; //temporaire pour stocker size of indice for render
 };
 
 #endif // GEOMETRYENGINE_H
