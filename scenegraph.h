@@ -6,6 +6,10 @@
 #ifndef SCENEGRAPH_H
 #define SCENEGRAPH_H
 
+#define SPHERE_NODE_ID 1
+#define CUBE_NODE_ID 2
+
+
 
 class SceneGraph
 {
@@ -17,11 +21,15 @@ private:
     std::vector<SceneGraphNode> graph;
     std::vector<SceneGraphNode*> addrGraph;
 
+    bool rootdefined;
+
 public:
     SceneGraph();
 
     void AddRoot(SceneGraphNode root,SceneGraphNode *addrRoot);
     void AddNode(SceneGraphNode node, SceneGraphNode *addrNode);
+
+    SceneGraphNode getNode(int);
 
     void addRotation(int objectID,QQuaternion rotation);
 

@@ -7,7 +7,7 @@ objectType SceneGraphNode::getType() const
 
 SceneGraphNode::SceneGraphNode()
 {
-    this->type = DEFAULT;
+    this->type = objectType::UNDEF;
 }
 
 SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, objectType type)
@@ -19,6 +19,11 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, objectType type)
 void SceneGraphNode::setTransform(Transform t)
 {
     transform=t;
+}
+
+void SceneGraphNode::addTransform(Transform t)
+{
+    transform.combineWith(t);
 }
 
 Transform SceneGraphNode::getTransform()

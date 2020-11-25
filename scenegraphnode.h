@@ -8,7 +8,6 @@
 
 using namespace std;
 
-enum objectType {SPHERE, CUBE, DEFAULT};
 
 #ifndef SCENEGRAPHNODE_H
 #define SCENEGRAPHNODE_H
@@ -28,6 +27,7 @@ public:
     SceneGraphNode(SceneGraphNode* parent, objectType type);
 
     void setTransform(Transform t);
+    void addTransform(Transform t);
 
     Transform getTransform();
 

@@ -57,31 +57,37 @@
 #include <string>
 #include <vector>
 
+enum objectType {UNDEF=-1,
+                 SPHERE,    //0
+                 CUBE};     //1
+
 class GeometryEngine : protected QOpenGLFunctions_3_1
 {
 public:
     GeometryEngine();
     virtual ~GeometryEngine();
 
-    void drawCubeGeometry(QOpenGLShaderProgram *program);
-    void drawObjGeometry(QOpenGLShaderProgram *program);
+    void drawCubeGeometry(int bufferID,QOpenGLShaderProgram *program);
+    void drawObjGeometry(int bufferID,QOpenGLShaderProgram *program);
+
+    //Depreciated
     void drawPlaneGeometry(QOpenGLShaderProgram *program, int size);
 
-    int getGeometryObjectID() const;
-    void setGeometryObjectID(int value);
-
 private:
-    void initCubeGeometry();
-    void initObjGeometry(std::string filename);
-    void initPlaneGeometry(int size);
-
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;
-    int GeometryObjectID;
+
     std::vector<QOpenGLBuffer> arrayBufs;
     std::vector<QOpenGLBuffer> indexBufs;
 
     int IndexSize; //temporaire pour stocker size of indice for render
-};
+
+    void initCubeGeometry(int bufferID);
+    void initObjGeometry(int bufferID,std::string filename);
+
+    //Depreciated
+    void initPlaneGeometry(int size);
+
+   };
 
 #endif // GEOMETRYENGINE_H

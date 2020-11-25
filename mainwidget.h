@@ -86,19 +86,22 @@ protected:
 
     void initShaders();
     void initTextures();
+    void initScene();
 
 private:
     QBasicTimer timer;
     QOpenGLShaderProgram program;
     GeometryEngine *geometries;
 
-    QOpenGLTexture *texture;
+    QOpenGLTexture *texture_ground;
+    QOpenGLTexture *texture_ball;
 
+    /*
     QOpenGLTexture *heightMap;
-
     QOpenGLTexture *grassTex;
     QOpenGLTexture *rockTex;
     QOpenGLTexture *snowTex;
+    */
 
     QMatrix4x4 projection;
 

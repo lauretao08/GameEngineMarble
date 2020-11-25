@@ -42,8 +42,10 @@ QVector3D Transform::applyToVersor(QVector3D v)
 
 Transform Transform::combineWith(Transform &t)
 {
-    //?
-    return t;
+    this->addRotation(t.getRotation());
+    this->addScaling(t.getScaling());
+    this->addTranslation(t.getTranslation());
+    return *this;
 }
 
 Transform Transform::inverse()
@@ -105,4 +107,20 @@ void Transform::setScaling(QVector3D s)
                               tmp(1,0),tmp(1,1)*s.y(),tmp(1,2),t.y(),
                               tmp(2,0),tmp(2,1),tmp(2,2)*s.z(),t.z(),
                               0,0,0,1);
+}
+
+
+void Transform::addRotation(QQuaternion r)
+{
+    setRotation(this->r+r);
+}
+
+void Transform::addTranslation(QVector3D t)
+{
+    setTranslation(this->t+t);
+}
+
+void Transform::addScaling(QVector3D s)
+{
+    setScaling(this->s+s);
 }

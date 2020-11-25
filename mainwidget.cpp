@@ -57,10 +57,11 @@
 MainWidget::MainWidget(QWidget *parent) :
     QOpenGLWidget(parent),
     geometries(0),
-    texture(0),
-    angularSpeed(0),
-    freeCamera(false)
+    texture_ground(0),
+    angularSpeed(0)
 {
+
+    freeCamera=true;
 }
 
 MainWidget::~MainWidget()
@@ -68,7 +69,8 @@ MainWidget::~MainWidget()
     // Make sure the context is current when deleting the texture
     // and the buffers.
     makeCurrent();
-    delete texture;
+    delete texture_ground;
+    delete texture_ball;
     delete geometries;
     doneCurrent();
 
@@ -84,7 +86,6 @@ void MainWidget::mousePressEvent(QMouseEvent *e)
 
 void MainWidget::mouseReleaseEvent(QMouseEvent *e)
 {
-
     // Mouse release position - mouse press position
     QVector2D diff = QVector2D(e->localPos()) - mousePressPosition;
 
@@ -99,17 +100,16 @@ void MainWidget::mouseReleaseEvent(QMouseEvent *e)
     rotationAxis = (rotationAxis * angularSpeed + n * acc).normalized();
 
     // Increase angular speed
-    angularSpeed += acc;
-
+    angularSpeed += 1*acc;
 }
 //! [0]
 
 //! [1]
 void MainWidget::timerEvent(QTimerEvent *)
 {
-    if(freeCamera){
+    //if(freeCamera){
         // Decrease angular speed (friction)
-        angularSpeed *= 0.99;
+        angularSpeed *= 0.9;
 
         // Stop rotation when speed goes below threshold
         if (angularSpeed < 0.01) {
@@ -121,6 +121,7 @@ void MainWidget::timerEvent(QTimerEvent *)
             // Request an update
             update();
         }
+    /*
     }else{
         float p,y,r;
         rotation.getEulerAngles(&p,&y,&r);
@@ -128,29 +129,55 @@ void MainWidget::timerEvent(QTimerEvent *)
         rotation = QQuaternion::fromEulerAngles(0.0,y+1.0,0.0);
         update();
     }
-
+    */
 }
 //! [1]
 
 void MainWidget::keyPressEvent(QKeyEvent *event){
+    QVector3D input(0.0f,0.0f,0.0f);
     switch(event->key()){
-    case Qt::Key_Up :{
-        projection.translate(0.0f,0.0f,0.1f);
+    case Qt::Key_Up :
+        input+=QVector3D(0.0f,0.0f,0.1f);
         break;
-    }
-    case Qt::Key_Down :{
-        projection.translate(0.0f,0.0f,-0.1f);
-        break;
-    }
-    case Qt::Key_Left :{
-        projection.translate(0.1f,0.0f,0.0f);
-        break;
-    }
-    case Qt::Key_Right :{
-        projection.translate(-0.1f,0.0f,0.0f);
-        break;
-    }
 
+    case Qt::Key_Down :
+        input+=QVector3D(0.0f,0.0f,-0.1f);
+        break;
+
+    case Qt::Key_Left :
+        input+=QVector3D(0.1f,0.0f,0.0f);
+        break;
+
+    case Qt::Key_Right :
+        input+=QVector3D(-0.1f,0.0f,0.0f);
+        break;
+
+    case Qt::Key_Z :
+        input+=QVector3D(0.0f,0.0f,0.1f);
+        break;
+
+    case Qt::Key_S :
+        input+=QVector3D(0.0f,0.0f,-0.1f);
+        break;
+
+    case Qt::Key_Q :
+        input+=QVector3D(0.1f,0.0f,0.0f);
+        break;
+
+    case Qt::Key_D :
+        input+=QVector3D(-0.1f,0.0f,0.0f);
+        break;
+
+    case Qt::Key_Shift  :
+        input+=QVector3D(0.0f,0.1f,0.0f);
+        //projection.translate(0,0.1,0);
+        break;
+
+    case Qt::Key_Space  :
+        input+=QVector3D(0.0f,-0.1f,0.0f);
+        //projection.translate(0,-0.1,0);
+        break;
+        /*
     case Qt::Key_C :{
         if(freeCamera){
             rotation = QQuaternion::fromEulerAngles(-45.0,0,0);
@@ -159,11 +186,13 @@ void MainWidget::keyPressEvent(QKeyEvent *event){
         }
         freeCamera=!freeCamera;
         break;
-    }
+    }*/
 
     default:
         break;
     }
+
+    projection.translate(input);
     update();
 }
 
@@ -177,8 +206,6 @@ void MainWidget::initializeGL()
     initShaders();
     initTextures();
 
-
-
 //! [2]
     // Enable depth buffer
     glEnable(GL_DEPTH_TEST);
@@ -189,24 +216,9 @@ void MainWidget::initializeGL()
 
     geometries = new GeometryEngine;
 
+    initScene();
     // Use QBasicTimer because its faster than QTimer
     timer.start(12, this);
-
-
-    //init scene
-    //Making the graph scene
-    scene = SceneGraph();
-
-    SceneGraphNode root = SceneGraphNode();
-    root.setTransform(Transform( QVector3D(0.0,-1.0,0.0) , QVector3D(0.5,0.5,0.5) , QQuaternion(0.0,0.0,0.0,0.0) ));
-    scene.AddRoot(root,&root);
-
-    SceneGraphNode earth = SceneGraphNode(&root, objectType::SPHERE);
-    earth.setTransform(Transform( QVector3D(0.0,2.0,0.0) , QVector3D(1.0,1.0,1.0) , QQuaternion(0.0,0.0,0.0,0.0) ));
-
-    scene.AddNode(earth,&earth);
-
-
 
 
 }
@@ -235,31 +247,47 @@ void MainWidget::initShaders()
 //! [4]
 void MainWidget::initTextures()
 {
-    // Load cube.png image
-    texture = new QOpenGLTexture(QImage(":/cube.png").mirrored());
 
-    // Set nearest filtering mode for texture minification
-    texture->setMinificationFilter(QOpenGLTexture::Nearest);
+    texture_ground = new QOpenGLTexture(QImage(":/texture/sol.png").mirrored());
+    texture_ground->setMinificationFilter(QOpenGLTexture::Nearest);
+    texture_ground->setMagnificationFilter(QOpenGLTexture::Linear);
+    texture_ground->setWrapMode(QOpenGLTexture::Repeat);
 
-    // Set bilinear filtering mode for texture magnification
-    texture->setMagnificationFilter(QOpenGLTexture::Linear);
-
-    // Wrap texture coordinates by repeating
-    // f.ex. texture coordinate (1.1, 1.2) is same as (0.1, 0.2)
-    texture->setWrapMode(QOpenGLTexture::Repeat);
+    texture_ball = new QOpenGLTexture(QImage(":/texture/balldimpled.png").mirrored());
+    texture_ball->setMinificationFilter(QOpenGLTexture::Nearest);
+    texture_ball->setMagnificationFilter(QOpenGLTexture::Linear);
+    texture_ball->setWrapMode(QOpenGLTexture::Repeat);
 
 
     //load heightmap
+    /*
     heightMap = new QOpenGLTexture(QImage(":/heightmap-1024x1024.png"));
 
     grassTex = new QOpenGLTexture(QImage(":/grass.png"));
     rockTex = new QOpenGLTexture(QImage(":/rock.png"));
     snowTex = new QOpenGLTexture(QImage(":/snowrocks.png"));
-
+    */
 
 }
 //! [4]
 
+void MainWidget::initScene(){
+    //Making the graph scene
+
+    scene = SceneGraph();
+
+    SceneGraphNode root = SceneGraphNode();
+    root.setTransform(Transform( QVector3D(0.0,0.0,0.0) , QVector3D(1.0,1.0,1.0) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    scene.AddRoot(root,&root); //Item 0 on scene
+
+    SceneGraphNode sphere_node = SceneGraphNode(&root, objectType::SPHERE);
+    sphere_node.setTransform(Transform( QVector3D(0.0,2.0,0.0) , QVector3D(1.0,1.0,1.0) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    scene.AddNode(sphere_node,&sphere_node); //Item 1 on Scene
+
+    SceneGraphNode cube_node = SceneGraphNode(&root, objectType::CUBE);
+    cube_node.setTransform(Transform( QVector3D(0.0,0.0,0.0) , QVector3D(2,0.5,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    scene.AddNode(cube_node,&cube_node); //Item 2
+}
 //! [5]
 void MainWidget::resizeGL(int w, int h)
 {
@@ -272,13 +300,9 @@ void MainWidget::resizeGL(int w, int h)
     // Reset projection
     projection.setToIdentity();
 
-
     // Set perspective projection
     projection.perspective(fov, aspect, zNear, zFar);
 
-    //init pos
-    projection.translate(0.0f,0.0f,-5.0f);
-    rotation = QQuaternion::fromEulerAngles(0.0,0,0);
 }
 //! [5]
 
@@ -287,23 +311,12 @@ void MainWidget::paintGL()
     // Clear color and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    texture->bind(0);
+    //Binding the textures to the matchinng buffers
+    texture_ball->bind(objectType::SPHERE);
+    texture_ground->bind(objectType::CUBE);
 
-
-
-//! [6]
-    // Calculate model view transformation
-    /*QMatrix4x4 matrix;
-    matrix.translate(0.0, 0.0, -5.0);
-    matrix.rotate(rotation);
-
-    // Set modelview-projection matrix
-    program.setUniformValue("mvp_matrix", projection * matrix);*/
-//! [6]
-
-    // Use texture unit 0 which contains cube.png
-    program.setUniformValue("texture", 0);
 /*
+
     float p,y,r;
     rotation.getEulerAngles(&p,&y,&r);
 
@@ -314,27 +327,7 @@ void MainWidget::paintGL()
     scene.addRotation(0,rotation);
     scene.addRotation(1,r2);
     scene.addRotation(2,r3);
-    */
+*/
+
     scene.displaySceneElements(&program, geometries ,projection, rotation);
-
-    /*heightMap->bind(1);
-    program.setUniformValue("height_map", 1);
-
-    grassTex->bind(2);
-    program.setUniformValue("grassTex", 2);
-    rockTex->bind(3);
-    program.setUniformValue("rockTex", 3);
-    snowTex->bind(4);
-    program.setUniformValue("snowTex", 4);*/
-
-    // Draw cube geometry
-    /*geometries->drawOFFGeometry(&program);
-
-    matrix.translate(1.0,0.0,0.0);
-    program.setUniformValue("mvp_matrix", projection * matrix);
-
-    geometries->drawOFFGeometry(&program);*/
-
-    //geometries->drawPlaneGeometry(&program,64);
-    //geometries->drawOFFGeometry(&program);
 }

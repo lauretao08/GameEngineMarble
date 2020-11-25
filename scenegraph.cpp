@@ -3,15 +3,19 @@
 
 SceneGraph::SceneGraph()
 {
-
+    rootdefined = false;
 }
 
 void SceneGraph::AddRoot(SceneGraphNode root, SceneGraphNode *addrRoot)
 {
+    if(rootdefined){
+        printf("[SceneGraph::AddRoot] WARNING : Redefining scene root");
+    }
     this->root=root;
     graph.push_back(root);
     this->addrRoot = addrRoot;
     addrGraph.push_back(addrRoot);
+    rootdefined = true;
 }
 
 void SceneGraph::AddNode(SceneGraphNode node, SceneGraphNode *addrNode)
@@ -27,10 +31,17 @@ void SceneGraph::addRotation(int objectID,QQuaternion rotation)
     graph[objectID].setTransform(t);
 }
 
+SceneGraphNode SceneGraph::getNode(int objectID){
+    return graph[objectID];
+}
+
 void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEngine *geometries, QMatrix4x4 projection, QQuaternion rotation)
 {
     if(graph.size()<1){
-        std::cout << "ERROR : GRAPH MUST CONTAIN ELEMENTS, AND THE ROOT NEEDS TO BE THE FIRST ELEMENT" << std::endl;
+        std::cout << "[SceneGraph::displaySceneElements] ERROR : Empty Graph !" << std::endl;
+    }
+    if(!rootdefined){
+        std::cout << "[SceneGraph::displaySceneElements] ERROR : Undefined Graph Root !" << std::endl;
     }
     SceneGraphNode current = root;
     SceneGraphNode *currentAddr = addrRoot;
@@ -39,22 +50,13 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
 
     bool ongoing=true;
 
-
     QMatrix4x4 matrix;
-    //QQuaternion rotation;
-    //QMatrix4x4 projection;
-    //matrix.translate(0.0, 0.0, -5.0);
-    //matrix.rotate(rotation);
-
-
-
-    // Set modelview-projection matrix
-    program->setUniformValue("mvp_matrix", projection * matrix);
-
-    //std::cout <<"(IN FUNC : )&ROOT : " << &root << ", earth.parent() : " << graph[1].getParent() << std::endl;
 
     while(ongoing){
-        //start by rendering the current scene object (for now, it always is a cube)
+        matrix.setToIdentity();
+        matrix.translate(0.0, 0.0, -5.0);
+        matrix.rotate(rotation);
+
         matrix.translate(current.getTransform().getTranslation());
         matrix.rotate(current.getTransform().getRotation());
         matrix.scale(current.getTransform().getScaling());
@@ -64,20 +66,19 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
 
         switch (current.getType()) {
             case objectType::CUBE :
-                geometries->drawCubeGeometry(program);
+                geometries->drawCubeGeometry(current.getType(),program);
                 break;
             case objectType::SPHERE :
-                geometries->drawObjGeometry(program);
+                geometries->drawObjGeometry(current.getType(),program);
                 break;
-            case objectType::DEFAULT :
-                geometries->drawCubeGeometry(program);
+            case objectType::UNDEF :
+            default :
                 break;
-            default : break;
         }
 
 
 
-        for(int i=0;i<graph.size();i++){
+        for(unsigned int i=0;i<graph.size();i++){
             //std::cout <<"current addr : " << currentAddr << ", graph["<< i<<"].getParent() : " << graph[i].getParent() << std::endl;
             if(graph[i].getParent()==currentAddr){
                 currentOrderedChildren.push_back(i);

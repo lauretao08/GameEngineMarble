@@ -21,6 +21,7 @@ HEADERS += \
     transform.h
 
 RESOURCES += \
+    obj.qrc \
     shaders.qrc \
     textures.qrc
 
@@ -28,6 +29,4 @@ RESOURCES += \
 target.path = $$[YOUR_PATH]
 INSTALLS += target
 
-DISTFILES += \
-    sphere.obj \
-    sphere.off
+DISTFILES +=
