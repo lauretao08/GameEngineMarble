@@ -89,7 +89,7 @@ GeometryEngine::GeometryEngine()
     initCubeGeometry(objectType::CUBE);
 
     //initPlaneGeometry(64);
-    std::string filename = ":/sphere.obj";
+    std::string filename = ":/sphere2.obj";
     initObjGeometry(objectType::SPHERE,filename);
 }
 
@@ -191,18 +191,24 @@ void GeometryEngine::initObjGeometry(int bufferID,std::string filename)
 
     for(size_t i = 0; i < vertices.size(); i++){
         t_vertices[i].position = vertices[i];
-        t_vertices[i].texCoord[0] = 0.5 +(atan2(-vertices[i].z(),-vertices[i].x()))/(2.0*M_PI);
-        t_vertices[i].texCoord[1] = 0.5 -(asin(-vertices[i].y()))/M_PI;
-        /*
+        QVector3D p = vertices[i];
+        p.normalize();
+        p=-p;
+        t_vertices[i].texCoord[0] = 0.5 +(atan2(p.z(),p.x()))/(2.0*M_PI);
+        t_vertices[i].texCoord[1] = 0.5 -(asin(p.y()))/M_PI;
+
+
+        //std::cout << t_vertices[i].position.x() <<"/"<< t_vertices[i].position.y() <<"/"<< t_vertices[i].position.z() << "->" << t_vertices[i].texCoord[0] <<"/"<< t_vertices[i].texCoord[1] << std::endl;
+
         if(t_vertices[i].texCoord[0]>1 || t_vertices[i].texCoord[0]<0){
 
             std::cout << "Correcting texCoord 0, value =" << t_vertices[i].texCoord[0] << std::endl;
-            t_vertices[i].texCoord[0]=0;
+            t_vertices[i].texCoord[0]=1;
         }
         if(t_vertices[i].texCoord[1]>1 || t_vertices[i].texCoord[1]<0){
-            t_vertices[i].texCoord[1]=0;
+            //t_vertices[i].texCoord[1]=0;
             std::cout << "Correcting texCoord 1" << std::endl;
-        }*/
+        }
     }
     for(size_t i = 0; i < indices.size(); i++){
         for(size_t j = 0; j < indices[i].size(); j++){

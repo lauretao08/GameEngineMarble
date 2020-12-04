@@ -253,7 +253,7 @@ void MainWidget::initTextures()
     texture_ground->setMagnificationFilter(QOpenGLTexture::Linear);
     texture_ground->setWrapMode(QOpenGLTexture::Repeat);
 
-    texture_ball = new QOpenGLTexture(QImage(":/texture/balldimpled.png").mirrored());
+    texture_ball = new QOpenGLTexture(QImage(":/texture/UV_Grid_Sm.png").mirrored());
     texture_ball->setMinificationFilter(QOpenGLTexture::Nearest);
     texture_ball->setMagnificationFilter(QOpenGLTexture::Linear);
     texture_ball->setWrapMode(QOpenGLTexture::Repeat);
