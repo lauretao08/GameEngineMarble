@@ -67,22 +67,31 @@ public:
     GeometryEngine();
     virtual ~GeometryEngine();
 
-    void drawCubeGeometry(int bufferID,QOpenGLShaderProgram *program);
-    void drawObjGeometry(int bufferID,QOpenGLShaderProgram *program);
+    void drawGeometry   (int bufferID,QOpenGLShaderProgram *program);
+
+    //Those are now just the same thing as drawGeometry
+    void drawCubeGeometry   (int bufferID,QOpenGLShaderProgram *program);
+    void drawObjGeometry    (int bufferID,QOpenGLShaderProgram *program);
+    //void drawSphereGeometry (int bufferID,QOpenGLShaderProgram *program);
+
 
     //Depreciated
     void drawPlaneGeometry(QOpenGLShaderProgram *program, int size);
 
+    void setWireframe(bool b);
+    bool getWireframe();
 private:
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;
 
     std::vector<QOpenGLBuffer> arrayBufs;
     std::vector<QOpenGLBuffer> indexBufs;
+    std::vector<int> IndexSize;
 
-    int IndexSize; //temporaire pour stocker size of indice for render
+    bool wireframe;
 
     void initCubeGeometry(int bufferID);
+    void initSphereGeometry(int bufferID);
     void initObjGeometry(int bufferID,std::string filename);
 
     //Depreciated

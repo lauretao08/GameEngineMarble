@@ -66,10 +66,8 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
 
         switch (current.getType()) {
             case objectType::CUBE :
-                geometries->drawCubeGeometry(current.getType(),program);
-                break;
             case objectType::SPHERE :
-                geometries->drawObjGeometry(current.getType(),program);
+                geometries->drawGeometry(current.getType(),program);
                 break;
             case objectType::UNDEF :
             default :

@@ -68,8 +68,8 @@ struct VertexData
 
 //! [0]
 GeometryEngine::GeometryEngine()
-   // : indexBuf(QOpenGLBuffer::IndexBuffer)
 {
+    wireframe = false;
     initializeOpenGLFunctions();
     QOpenGLBuffer arrayBuf1, arrayBuf2;
     QOpenGLBuffer indexBuf1(QOpenGLBuffer::IndexBuffer), indexBuf2(QOpenGLBuffer::IndexBuffer);
@@ -80,17 +80,19 @@ GeometryEngine::GeometryEngine()
     arrayBufs.push_back(arrayBuf2);
     indexBufs.push_back(indexBuf1);
     indexBufs.push_back(indexBuf2);
-/*
-    // Generate 2 VBOs
-    arrayBuf.create();
-    indexBuf.create();
-*/
+    IndexSize.push_back(-1);
+    IndexSize.push_back(-1);
+
+
     // Initializes cube geometry and transfers it to VBOs
     initCubeGeometry(objectType::CUBE);
 
     //initPlaneGeometry(64);
+
+    initSphereGeometry(objectType::SPHERE);
+
     std::string filename = ":/sphere2.obj";
-    initObjGeometry(objectType::SPHERE,filename);
+    //initObjGeometry(objectType::SPHERE,filename);
 }
 
 GeometryEngine::~GeometryEngine()
@@ -106,6 +108,23 @@ GeometryEngine::~GeometryEngine()
 
 }
 //! [0]
+
+void GeometryEngine::setWireframe(bool b){
+    wireframe = b;
+    if(wireframe){
+        glPolygonMode(GL_FRONT_AND_BACK ,GL_LINE);
+    }else{
+        glPolygonMode(GL_FRONT_AND_BACK ,GL_FILL);
+
+    }
+}
+
+bool GeometryEngine::getWireframe(){
+    return wireframe;
+}
+
+/********************************************/
+//InitXXXGeometry
 
 void GeometryEngine::initCubeGeometry(int bufferID)
 {
@@ -167,6 +186,7 @@ void GeometryEngine::initCubeGeometry(int bufferID)
     };
 
 //! [1]
+   IndexSize[bufferID] = 34;
     // Transfer vertex data to VBO 0
     arrayBufs[bufferID].bind();
     arrayBufs[bufferID].allocate(vertices, 24 * sizeof(VertexData));
@@ -175,6 +195,77 @@ void GeometryEngine::initCubeGeometry(int bufferID)
     indexBufs[bufferID].bind();
     indexBufs[bufferID].allocate(indices, 34 * sizeof(GLushort));
     //! [1]
+}
+
+void GeometryEngine::initSphereGeometry(int bufferID){
+    const int strip_size  = 32; //Alpha Phy
+    const int strip_count = 32; //Beta  Theta
+
+    //Defining the Vertices
+    VertexData t_vertices[((strip_size+1)*(strip_count+1))-2];
+    int t_vertices_it = 0;
+    for(int out_strip_it=0;out_strip_it<=strip_count;out_strip_it++){
+        float theta = 2.0f *M_PI * (float)out_strip_it/(float)strip_count;
+        for(int in_strip_it=0;in_strip_it<=strip_size;in_strip_it++){
+            float phy = (M_PI/2.0f) - M_PI*((float)in_strip_it/(float)strip_size);
+            if(out_strip_it==strip_count &&(in_strip_it==0 || in_strip_it==strip_size)){
+
+            }else{
+                t_vertices[t_vertices_it].position={QVector3D(
+                                                    cos(phy)*cos(theta),
+                                                    cos(phy)*sin(theta),
+                                                    sin(phy))};
+                t_vertices[t_vertices_it].texCoord={QVector2D(
+                                                    theta/((float)2*M_PI),   //u  about Theta
+                                                    (phy/M_PI)-0.5f)}; //V about Phy
+                t_vertices_it++;
+            }
+        }
+    }
+    //std::cout<<"Vertices size = "<<t_vertices_it<<std::endl;
+
+    //Defining the indices
+    GLushort t_indices[(strip_size+1)*(strip_count+1)*2-2];
+    int t_indices_it = 0;
+
+    //for(int i_strip=0;i_strip<=4;i_strip++){
+    for(int i_strip=0;i_strip<strip_count;i_strip++){
+        t_indices[t_indices_it]=i_strip*(1+strip_size);
+        t_indices_it++;
+
+        for(int lil_i=0;lil_i<=strip_size;lil_i++){
+            t_indices[t_indices_it]=lil_i+(i_strip*(1+strip_size));
+            t_indices_it++;
+            if(lil_i==strip_size-1){//If we are on the end of a strip
+
+                if(i_strip==strip_count-1){//If we are on the last strip
+                    t_indices[t_indices_it]=lil_i+1+(i_strip*(1+strip_size));
+                }else{
+                    t_indices[t_indices_it]=lil_i+1+(i_strip*(1+strip_size));
+                }
+                t_indices_it++;
+            }else{
+                if(i_strip==strip_count-1){//If we are on the last strip
+                    t_indices[t_indices_it]=lil_i+strip_size+1+(i_strip*(1+strip_size));
+                }else{
+                    t_indices[t_indices_it]=lil_i+strip_size+2+(i_strip*(1+strip_size));
+                }
+                t_indices_it++;
+            }
+        }
+        t_indices[t_indices_it]=t_indices[t_indices_it-1];
+        t_indices_it++;
+    }
+
+    //std::cout<<"Indice size = "<<t_indices_it<<std::endl;
+    this->IndexSize[bufferID] = t_indices_it; // sauvegarder size pour render
+    arrayBufs[bufferID].bind();
+    arrayBufs[bufferID].allocate(t_vertices, t_vertices_it * sizeof(VertexData));
+
+    indexBufs[bufferID].bind();
+    indexBufs[bufferID].allocate(t_indices, t_indices_it * sizeof(GLushort));
+
+
 }
 
 void GeometryEngine::initObjGeometry(int bufferID,std::string filename)
@@ -193,10 +284,13 @@ void GeometryEngine::initObjGeometry(int bufferID,std::string filename)
         t_vertices[i].position = vertices[i];
         QVector3D p = vertices[i];
         p.normalize();
-        p=-p;
         t_vertices[i].texCoord[0] = 0.5 +(atan2(p.z(),p.x()))/(2.0*M_PI);
         t_vertices[i].texCoord[1] = 0.5 -(asin(p.y()))/M_PI;
 
+        if(t_vertices[i].texCoord[0]<0.01 || t_vertices[i].texCoord[0]>0.99){
+            std::cout << t_vertices[i].position.x() <<"/"<< t_vertices[i].position.y() <<"/"<< t_vertices[i].position.z() << "->"
+                      << t_vertices[i].texCoord[0] <<"/"<< t_vertices[i].texCoord[1] << std::endl;
+        }
 
         //std::cout << t_vertices[i].position.x() <<"/"<< t_vertices[i].position.y() <<"/"<< t_vertices[i].position.z() << "->" << t_vertices[i].texCoord[0] <<"/"<< t_vertices[i].texCoord[1] << std::endl;
 
@@ -216,49 +310,40 @@ void GeometryEngine::initObjGeometry(int bufferID,std::string filename)
         }
     }
 
-    this->IndexSize = size_indices; // sauvegarder size pour render
+    this->IndexSize[bufferID] = size_indices; // sauvegarder size pour render
     arrayBufs[bufferID].bind();
     arrayBufs[bufferID].allocate(t_vertices, size_vertices * sizeof(VertexData));
 
     indexBufs[bufferID].bind();
     indexBufs[bufferID].allocate(t_indices, size_indices * sizeof(GLushort));
-
 }
 
-/*
-void GeometryEngine::initObjGeometry(int bufferID,std::string filename)
+/********************************************/
+//DrawXXXGeometries
+
+void GeometryEngine::drawGeometry(int bufferID,QOpenGLShaderProgram *program)
 {
-    std::vector<QVector3D> vertices;
-    std::vector<std::vector<GLushort>> indices;
-    OBJIO::open(filename,vertices,indices);
-
-    int size_vertices = vertices.size();
-    int size_indices = indices.size() * 3;
-
-
-    QVector3D * t_vertices = new QVector3D[vertices.size()];
-    GLushort * t_indices = new GLushort[indices.size() * 3];
-
-    for(size_t i = 0; i < vertices.size(); i++){
-        t_vertices[i] = vertices[i];
-    }
-    for(size_t i = 0; i < indices.size(); i++){
-        for(size_t j = 0; j < indices[i].size(); j++){
-            t_indices[i * 3 + j] = indices[i][j];
-        }
-    }
-
-    this->IndexSize = size_indices; // sauvegarder size pour render
+    // Tell OpenGL which VBOs to use
     arrayBufs[bufferID].bind();
-    arrayBufs[bufferID].allocate(t_vertices, size_vertices * sizeof(QVector3D));
-
     indexBufs[bufferID].bind();
-    indexBufs[bufferID].allocate(t_indices, size_indices * sizeof(GLushort));
+
+    program->setUniformValue("texture", bufferID);
+    quintptr offset = 0;	// Offset for position
+
+    // Tell OpenGL programmable pipeline how to locate vertex position data
+    int vertexLocation = program->attributeLocation("a_position");
+    program->enableAttributeArray(vertexLocation);
+    program->setAttributeBuffer(vertexLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
+
+    offset += sizeof(QVector3D);// Offset for texture coordinate
+
+    int texcoordLocation = program->attributeLocation("a_texcoord");
+    program->enableAttributeArray(texcoordLocation);
+    program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(VertexData));
+
+    glDrawElements(GL_TRIANGLE_STRIP, IndexSize[bufferID], GL_UNSIGNED_SHORT, 0);
 }
 
-*/
-
-//! [2]
 void GeometryEngine::drawCubeGeometry(int bufferID,QOpenGLShaderProgram *program)
 {
     if(bufferID!=objectType::CUBE){
@@ -268,11 +353,8 @@ void GeometryEngine::drawCubeGeometry(int bufferID,QOpenGLShaderProgram *program
     arrayBufs[bufferID].bind();
     indexBufs[bufferID].bind();
 
-
     program->setUniformValue("texture", bufferID);
-
-    // Offset for position
-    quintptr offset = 0;
+    quintptr offset = 0;	// Offset for position
 
     // Tell OpenGL programmable pipeline how to locate vertex position data
     int vertexLocation = program->attributeLocation("a_position");
@@ -282,13 +364,11 @@ void GeometryEngine::drawCubeGeometry(int bufferID,QOpenGLShaderProgram *program
     // Offset for texture coordinate
     offset += sizeof(QVector3D);
 
-    // Tell OpenGL programmable pipeline how to locate vertex texture coordinate data
     int texcoordLocation = program->attributeLocation("a_texcoord");
     program->enableAttributeArray(texcoordLocation);
     program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(VertexData));
 
-    // Draw cube geometry using indices from VBO 1
-    glDrawElements(GL_TRIANGLE_STRIP, 34, GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLE_STRIP, IndexSize[bufferID], GL_UNSIGNED_SHORT, 0);
 }
 
 void GeometryEngine::drawObjGeometry(int bufferID,QOpenGLShaderProgram *program)
@@ -301,8 +381,7 @@ void GeometryEngine::drawObjGeometry(int bufferID,QOpenGLShaderProgram *program)
     indexBufs[bufferID].bind();
 
     program->setUniformValue("texture", bufferID);
-    // Offset for position
-    quintptr offset = 0;
+    quintptr offset = 0;	// Offset for position
 
     // Tell OpenGL programmable pipeline how to locate vertex position data
     int vertexLocation = program->attributeLocation("a_position");
@@ -315,11 +394,13 @@ void GeometryEngine::drawObjGeometry(int bufferID,QOpenGLShaderProgram *program)
     int texcoordLocation = program->attributeLocation("a_texcoord");
     program->enableAttributeArray(texcoordLocation);
     program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(VertexData));
-    //glPolygonMode(GL_FRONT_AND_BACK ,GL_LINE);
-    glDrawElements(GL_TRIANGLES, IndexSize, GL_UNSIGNED_SHORT, 0);
-}
-//! [2]
 
+    glDrawElements(GL_TRIANGLE_STRIP, IndexSize[bufferID], GL_UNSIGNED_SHORT, 0);
+
+}
+
+/*********************************************/
+//Trash Zone (Depreciated)
 
 void GeometryEngine::initPlaneGeometry(int size)
 {
@@ -398,8 +479,7 @@ void GeometryEngine::initPlaneGeometry(int size)
 
 }
 
-void GeometryEngine::drawPlaneGeometry(QOpenGLShaderProgram *program, int size)
-{
+void GeometryEngine::drawPlaneGeometry(QOpenGLShaderProgram *program, int size){
     printf("[GeometryEngine::drawPlaneGeometry] WARNING : Deprecated");
     // Tell OpenGL which VBOs to use
     arrayBuf.bind();
@@ -424,21 +504,3 @@ void GeometryEngine::drawPlaneGeometry(QOpenGLShaderProgram *program, int size)
     // Draw cube geometry using indices from VBO 1
     glDrawElements(GL_TRIANGLE_STRIP, ((size*size*2)-4), GL_UNSIGNED_SHORT, 0);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -88,10 +88,11 @@ protected:
     void initTextures();
     void initScene();
 
+    GeometryEngine *geometries;
 private:
     QBasicTimer timer;
     QOpenGLShaderProgram program;
-    GeometryEngine *geometries;
+    //GeometryEngine *geometries;
 
     QOpenGLTexture *texture_ground;
     QOpenGLTexture *texture_ball;

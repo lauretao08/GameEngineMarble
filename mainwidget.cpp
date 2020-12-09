@@ -82,6 +82,7 @@ void MainWidget::mousePressEvent(QMouseEvent *e)
 {
     // Save mouse press position
     mousePressPosition = QVector2D(e->localPos());
+
 }
 
 void MainWidget::mouseReleaseEvent(QMouseEvent *e)
@@ -177,6 +178,13 @@ void MainWidget::keyPressEvent(QKeyEvent *event){
         input+=QVector3D(0.0f,-0.1f,0.0f);
         //projection.translate(0,-0.1,0);
         break;
+    case Qt::Key_W:
+        geometries->setWireframe(true);
+        break;
+
+    case Qt::Key_X:
+        geometries->setWireframe(false);
+        break;
         /*
     case Qt::Key_C :{
         if(freeCamera){
@@ -253,21 +261,10 @@ void MainWidget::initTextures()
     texture_ground->setMagnificationFilter(QOpenGLTexture::Linear);
     texture_ground->setWrapMode(QOpenGLTexture::Repeat);
 
-    texture_ball = new QOpenGLTexture(QImage(":/texture/UV_Grid_Sm.png").mirrored());
+    texture_ball = new QOpenGLTexture(QImage(":/texture/balldimpled.png").mirrored(true,false));
     texture_ball->setMinificationFilter(QOpenGLTexture::Nearest);
     texture_ball->setMagnificationFilter(QOpenGLTexture::Linear);
     texture_ball->setWrapMode(QOpenGLTexture::Repeat);
-
-
-    //load heightmap
-    /*
-    heightMap = new QOpenGLTexture(QImage(":/heightmap-1024x1024.png"));
-
-    grassTex = new QOpenGLTexture(QImage(":/grass.png"));
-    rockTex = new QOpenGLTexture(QImage(":/rock.png"));
-    snowTex = new QOpenGLTexture(QImage(":/snowrocks.png"));
-    */
-
 }
 //! [4]
 
