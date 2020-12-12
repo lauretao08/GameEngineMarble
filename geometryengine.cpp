@@ -111,12 +111,7 @@ GeometryEngine::~GeometryEngine()
 
 void GeometryEngine::setWireframe(bool b){
     wireframe = b;
-    if(wireframe){
-        glPolygonMode(GL_FRONT_AND_BACK ,GL_LINE);
-    }else{
-        glPolygonMode(GL_FRONT_AND_BACK ,GL_FILL);
 
-    }
 }
 
 bool GeometryEngine::getWireframe(){
@@ -198,8 +193,8 @@ void GeometryEngine::initCubeGeometry(int bufferID)
 }
 
 void GeometryEngine::initSphereGeometry(int bufferID){
-    const int strip_size  = 32; //Alpha Phy
-    const int strip_count = 32; //Beta  Theta
+    const int strip_size  = 18; //Alpha Phy
+    const int strip_count = 18; //Beta  Theta
 
     //Defining the Vertices
     VertexData t_vertices[((strip_size+1)*(strip_count+1))-2];
@@ -341,6 +336,12 @@ void GeometryEngine::drawGeometry(int bufferID,QOpenGLShaderProgram *program)
     program->enableAttributeArray(texcoordLocation);
     program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(VertexData));
 
+    if(wireframe){
+        glPolygonMode(GL_FRONT_AND_BACK ,GL_LINE);
+    }else{
+        glPolygonMode(GL_FRONT_AND_BACK ,GL_FILL);
+
+    }
     glDrawElements(GL_TRIANGLE_STRIP, IndexSize[bufferID], GL_UNSIGNED_SHORT, 0);
 }
 
