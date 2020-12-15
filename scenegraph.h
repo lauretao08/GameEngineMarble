@@ -9,7 +9,8 @@
 #define SPHERE_NODE_ID 1
 #define CUBE_NODE_ID 2
 
-
+#define MAIN_NODE_ID SPHERE_NODE_ID
+#include <cmath>
 
 class SceneGraph
 {
@@ -33,8 +34,10 @@ public:
 
     void addRotation(int objectID,QQuaternion rotation);
 
-
     void displaySceneElements(QOpenGLShaderProgram *program,GeometryEngine *geometries, QMatrix4x4 projection, QQuaternion rotation);
+
+    void manageCollision();
+    bool isColliding(int id_a,int id_b);
 };
 
 #endif // SCENEGRAPH_H

@@ -21,6 +21,10 @@ private:
     Transform transform;
     objectType type;
 
+    bool Drawable;
+    bool Collidable;
+
+
 public:
     SceneGraphNode();
 
@@ -35,6 +39,8 @@ public:
 
 
     objectType getType() const;
+    bool isDrawable() const;
+    bool isCollidable() const;
 };
 
 #endif // SCENEGRAPHNODE_H

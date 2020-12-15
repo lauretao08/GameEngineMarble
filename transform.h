@@ -31,8 +31,10 @@ public:
     Transform interpolateWith(Transform &t, float k);
 
     QQuaternion getRotation();
+    QMatrix3x3 getRotationAsMatrix();
     QVector3D getTranslation();
     QVector3D getScaling();
+
 
     void setRotation(QQuaternion r);
     void setTranslation(QVector3D t);

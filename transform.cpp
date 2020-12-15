@@ -69,6 +69,10 @@ QQuaternion Transform::getRotation()
     return this->r;
 }
 
+QMatrix3x3 Transform::getRotationAsMatrix(){
+    return this->r.toRotationMatrix();
+}
+
 QVector3D Transform::getTranslation()
 {
     return this->t;

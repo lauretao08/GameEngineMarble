@@ -1,5 +1,6 @@
 #include "scenegraph.h"
 #include <iostream>
+#include <QVector3D>
 
 SceneGraph::SceneGraph()
 {
@@ -64,6 +65,11 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
         // Set modelview-projection matrix
         program->setUniformValue("mvp_matrix", projection * matrix);
 
+
+        if(current.isDrawable()){
+            geometries->drawGeometry(current.getType(),program);
+        }
+        /*
         switch (current.getType()) {
             case objectType::CUBE :
             case objectType::SPHERE :
@@ -73,7 +79,7 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
             default :
                 break;
         }
-
+        */
 
 
         for(unsigned int i=0;i<graph.size();i++){
@@ -95,5 +101,84 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
     }
 
 
+
+}
+
+void SceneGraph::manageCollision(){
+    std::vector<int> collisions;
+    for(int i=0;i<graph.size();i++){
+        if(isColliding(MAIN_NODE_ID,i)){
+            collisions.push_back(i);
+            std::cout<<"Contact "<<std::endl;
+        }
+    }
+}
+
+bool SceneGraph::isColliding(int id_a,int id_b){
+    if(!getNode(id_a).isCollidable() || !getNode(id_b).isCollidable()){
+        return false;
+    }
+    if(id_a == id_b){
+        return false;
+    }
+    SceneGraphNode SGN_a = getNode(id_a);
+    SceneGraphNode SGN_b = getNode(id_b);
+
+    if(SGN_a.getType()==objectType::SPHERE){
+        if(SGN_b.getType()==objectType::SPHERE){
+            //Sphere X Sphere collision
+
+            std::cout<<"<"<<id_a<<","<<id_b<<"> SphereXSphere collision"<<std::endl;
+            //Distance between the two centers < 2 radius
+            QVector3D center_A = SGN_a.getTransform().getTranslation();
+            QVector3D center_B = SGN_b.getTransform().getTranslation();
+            double C = sqrt( pow( center_A.x()- center_B.x(), 2 ) +
+                         pow( center_A.y()- center_B.y(), 2 ) +
+                         pow( center_A.z()- center_B.z(), 2 ) );
+            double R =  SGN_a.getTransform().getScaling().x() + SGN_b.getTransform().getScaling().x();
+            //std::cout <<"C = "<<C<<"/R = "<<R<<std::endl;
+            return (C<R);
+
+        }else if(SGN_b.getType()==objectType::CUBE){
+            //Sphere X Cube
+
+            std::cout<<"<"<<id_a<<","<<id_b<<"> SphereXCube collision"<<std::endl;
+
+            QVector3D closestPoint = SGN_b.getTransform().getTranslation();
+            QVector3D direction = SGN_a.getTransform().getTranslation() - closestPoint;
+            QMatrix3x3 rotation = SGN_b.getTransform().getRotationAsMatrix();
+            for (int i = 0; i < 3; ++i) { //Going direction by direction
+                QVector3D axis(rotation(i,0),rotation(i,1),rotation(i,2));
+                float distance = QVector3D::dotProduct(direction, axis);
+                //std::cout<<"Distance"<<distance<<std::endl;
+
+                if (distance > SGN_b.getTransform().getTranslation()[i] + SGN_b.getTransform().getScaling()[i]) {
+                    distance = SGN_b.getTransform().getTranslation()[i] + SGN_b.getTransform().getScaling()[i];
+                }
+                if (distance < -(SGN_b.getTransform().getTranslation()[i] + SGN_b.getTransform().getScaling()[i])) {
+                    distance = -(SGN_b.getTransform().getTranslation()[i] + SGN_b.getTransform().getScaling()[i]);
+                }
+
+                closestPoint = closestPoint + (axis * distance);
+                //std::cout <<"ClosestPoint"<< closestPoint.x() <<","<<closestPoint.y()<<","<<closestPoint.z()<<std::endl;
+            }
+            float distSq = QVector3D::dotProduct(SGN_a.getTransform().getTranslation() - closestPoint,SGN_a.getTransform().getTranslation() - closestPoint);  //Dot product of himself
+            float radiusSq = SGN_a.getTransform().getScaling().x() * SGN_a.getTransform().getScaling().x();
+            //std::cout <<"Dist = "<<distSq<<"/Rad = "<<radiusSq<<std::endl;
+            return distSq < radiusSq;
+            //Todo
+        }
+    }else if(SGN_a.getType()==objectType::CUBE){
+        if(SGN_b.getType()==objectType::SPHERE){
+            //Cube X Sphere
+            std::cout<<"<"<<id_a<<","<<id_b<<"> CubeXSphere collision"<<std::endl;
+            //Todo
+        }else if(SGN_b.getType()==objectType::CUBE){
+            //Cube X Cube
+            std::cout<<"<"<<id_a<<","<<id_b<<"> CubeXCube collision"<<std::endl;
+            //Todo
+        }
+    }
+    return false;
 
 }
