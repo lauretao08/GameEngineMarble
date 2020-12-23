@@ -8,13 +8,11 @@
 
 using namespace std;
 
-
 #ifndef SCENEGRAPHNODE_H
 #define SCENEGRAPHNODE_H
 
 
-class SceneGraphNode
-{
+class SceneGraphNode{
 
 private:
     SceneGraphNode* parent;
@@ -27,20 +25,18 @@ private:
 
 public:
     SceneGraphNode();
-
     SceneGraphNode(SceneGraphNode* parent, objectType type);
-
-    void setTransform(Transform t);
-    void addTransform(Transform t);
-
-    Transform getTransform();
-
-    SceneGraphNode *getParent();
-
 
     objectType getType() const;
     bool isDrawable() const;
     bool isCollidable() const;
+
+    Transform getTransform();
+    SceneGraphNode *getParent();
+
+    void setTransform(Transform t);
+    void addTransform(Transform t);
+
 };
 
 #endif // SCENEGRAPHNODE_H

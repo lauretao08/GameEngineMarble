@@ -2,6 +2,7 @@
 #include <vector>
 #include <QMatrix4x4>
 #include <QQuaternion>
+#include <cmath>
 
 #ifndef SCENEGRAPH_H
 #define SCENEGRAPH_H
@@ -10,11 +11,8 @@
 #define CUBE_NODE_ID 2
 
 #define MAIN_NODE_ID SPHERE_NODE_ID
-#include <cmath>
 
-class SceneGraph
-{
-
+class SceneGraph{
 private:
 
     SceneGraphNode root;
@@ -32,9 +30,10 @@ public:
 
     SceneGraphNode getNode(int);
 
-    void addRotation(int objectID,QQuaternion rotation);
+    void addTranslation(int objectID,Translation translation);
+    void addRotation(int objectID,Rotation rotation);
 
-    void displaySceneElements(QOpenGLShaderProgram *program,GeometryEngine *geometries, QMatrix4x4 projection, QQuaternion rotation);
+    void displaySceneElements(QOpenGLShaderProgram *program,GeometryEngine *geometries, QMatrix4x4 projection, Rotation rotation);
 
     void manageCollision();
     bool isColliding(int id_a,int id_b);

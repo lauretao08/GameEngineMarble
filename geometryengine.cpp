@@ -60,15 +60,12 @@
 #include <fstream>
 #include <cmath>
 
-struct VertexData
-{
+struct VertexData{
     QVector3D position;
     QVector2D texCoord;
 };
 
-//! [0]
-GeometryEngine::GeometryEngine()
-{
+GeometryEngine::GeometryEngine(){
     wireframe = false;
     initializeOpenGLFunctions();
     QOpenGLBuffer arrayBuf1, arrayBuf2;
@@ -83,15 +80,12 @@ GeometryEngine::GeometryEngine()
     IndexSize.push_back(-1);
     IndexSize.push_back(-1);
 
-
     // Initializes cube geometry and transfers it to VBOs
     initCubeGeometry(objectType::CUBE);
 
-    //initPlaneGeometry(64);
-
     initSphereGeometry(objectType::SPHERE);
 
-    std::string filename = ":/sphere2.obj";
+    //std::string filename = ":/sphere2.obj";
     //initObjGeometry(objectType::SPHERE,filename);
 }
 
@@ -107,11 +101,10 @@ GeometryEngine::~GeometryEngine()
     }
 
 }
-//! [0]
+
 
 void GeometryEngine::setWireframe(bool b){
     wireframe = b;
-
 }
 
 bool GeometryEngine::getWireframe(){
@@ -121,47 +114,46 @@ bool GeometryEngine::getWireframe(){
 /********************************************/
 //InitXXXGeometry
 
-void GeometryEngine::initCubeGeometry(int bufferID)
-{
+void GeometryEngine::initCubeGeometry(int bufferID){
     // For cube we would need only 8 vertices but we have to
     // duplicate vertex for each face because texture coordinate
     // is different.
     VertexData vertices[] = {
         // Vertex data for face 0
         {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(0.0f, 0.0f)},  // v0
-        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(0.33f, 0.0f)}, // v1
-        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(0.0f, 0.5f)},  // v2
-        {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.33f, 0.5f)}, // v3
+        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(1.0f, 0.0f)}, // v1
+        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(0.0f, 1.0f)},  // v2
+        {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(1.0f, 1.0f)}, // v3
 
         // Vertex data for face 1
-        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D( 0.0f, 0.5f)}, // v4
-        {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.33f, 0.5f)}, // v5
+        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(0.0f, 0.0f)}, // v4
+        {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(1.0f, 0.0f)}, // v5
         {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.0f, 1.0f)},  // v6
-        {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.33f, 1.0f)}, // v7
+        {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(1.0f, 1.0f)}, // v7
 
         // Vertex data for face 2
-        {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.66f, 0.5f)}, // v8
-        {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(1.0f, 0.5f)},  // v9
-        {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.66f, 1.0f)}, // v10
+        {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.0f, 0.0f)}, // v8
+        {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(1.0f, 0.0f)},  // v9
+        {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.0f, 1.0f)}, // v10
         {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(1.0f, 1.0f)},  // v11
 
         // Vertex data for face 3
-        {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(0.66f, 0.0f)}, // v12
+        {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(0.0f, 0.0f)}, // v12
         {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(1.0f, 0.0f)},  // v13
-        {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(0.66f, 0.5f)}, // v14
-        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(1.0f, 0.5f)},  // v15
+        {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(0.0f, 1.0f)}, // v14
+        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(1.0f, 1.0f)},  // v15
 
         // Vertex data for face 4
-        {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(0.33f, 0.0f)}, // v16
-        {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.66f, 0.0f)}, // v17
-        {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(0.33f, 0.5f)}, // v18
-        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(0.66f, 0.5f)}, // v19
+        {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(0.0f, 0.0f)}, // v16
+        {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(1.0f, 0.0f)}, // v17
+        {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(0.0f, 1.0f)}, // v18
+        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(1.0f, 1.0f)}, // v19
 
         // Vertex data for face 5
-        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(0.33f, 0.5f)}, // v20
-        {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.66f, 0.5f)}, // v21
-        {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(0.33f, 1.0f)}, // v22
-        {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.66f, 1.0f)}  // v23
+        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(0.0f, 0.0f)}, // v20
+        {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(1.0f, 0.0f)}, // v21
+        {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(0.0f, 1.0f)}, // v22
+        {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(1.0f, 1.0f)}  // v23
     };
 
     // Indices for drawing cube faces using triangle strips.
@@ -263,8 +255,7 @@ void GeometryEngine::initSphereGeometry(int bufferID){
 
 }
 
-void GeometryEngine::initObjGeometry(int bufferID,std::string filename)
-{
+void GeometryEngine::initObjGeometry(int bufferID,std::string filename){
     std::vector<QVector3D> vertices;
     std::vector<std::vector<GLushort>> indices;
     OBJIO::open(filename,vertices,indices);
@@ -316,8 +307,7 @@ void GeometryEngine::initObjGeometry(int bufferID,std::string filename)
 /********************************************/
 //DrawXXXGeometries
 
-void GeometryEngine::drawGeometry(int bufferID,QOpenGLShaderProgram *program)
-{
+void GeometryEngine::drawGeometry(int bufferID,QOpenGLShaderProgram *program){
     // Tell OpenGL which VBOs to use
     arrayBufs[bufferID].bind();
     indexBufs[bufferID].bind();
@@ -345,8 +335,7 @@ void GeometryEngine::drawGeometry(int bufferID,QOpenGLShaderProgram *program)
     glDrawElements(GL_TRIANGLE_STRIP, IndexSize[bufferID], GL_UNSIGNED_SHORT, 0);
 }
 
-void GeometryEngine::drawCubeGeometry(int bufferID,QOpenGLShaderProgram *program)
-{
+void GeometryEngine::drawCubeGeometry(int bufferID,QOpenGLShaderProgram *program){
     if(bufferID!=objectType::CUBE){
         printf("[GeometryEngine::drawCubeGeometry] : Be careful you may be using the wrong buffer, texture may also be off \n");
     }
@@ -372,8 +361,7 @@ void GeometryEngine::drawCubeGeometry(int bufferID,QOpenGLShaderProgram *program
     glDrawElements(GL_TRIANGLE_STRIP, IndexSize[bufferID], GL_UNSIGNED_SHORT, 0);
 }
 
-void GeometryEngine::drawObjGeometry(int bufferID,QOpenGLShaderProgram *program)
-{
+void GeometryEngine::drawObjGeometry(int bufferID,QOpenGLShaderProgram *program){
     if(bufferID!=objectType::SPHERE){
         printf("[GeometryEngine::drawObjGeometry] : Be careful you may be using the wrong buffer, texture may also be off \n");
     }
@@ -397,14 +385,12 @@ void GeometryEngine::drawObjGeometry(int bufferID,QOpenGLShaderProgram *program)
     program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(VertexData));
 
     glDrawElements(GL_TRIANGLE_STRIP, IndexSize[bufferID], GL_UNSIGNED_SHORT, 0);
-
 }
 
 /*********************************************/
 //Trash Zone (Depreciated)
 
-void GeometryEngine::initPlaneGeometry(int size)
-{
+void GeometryEngine::initPlaneGeometry(int size){
     printf("[GeometryEngine::initPlaneGeometry] WARNING : Deprecated");
     //Read height map
     //QImage heightMap;

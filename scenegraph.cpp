@@ -2,13 +2,11 @@
 #include <iostream>
 #include <QVector3D>
 
-SceneGraph::SceneGraph()
-{
+SceneGraph::SceneGraph(){
     rootdefined = false;
 }
 
-void SceneGraph::AddRoot(SceneGraphNode root, SceneGraphNode *addrRoot)
-{
+void SceneGraph::AddRoot(SceneGraphNode root, SceneGraphNode *addrRoot){
     if(rootdefined){
         printf("[SceneGraph::AddRoot] WARNING : Redefining scene root");
     }
@@ -19,25 +17,31 @@ void SceneGraph::AddRoot(SceneGraphNode root, SceneGraphNode *addrRoot)
     rootdefined = true;
 }
 
-void SceneGraph::AddNode(SceneGraphNode node, SceneGraphNode *addrNode)
-{
+void SceneGraph::AddNode(SceneGraphNode node, SceneGraphNode *addrNode){
     graph.push_back(node);
     addrGraph.push_back(addrNode);
 }
 
-void SceneGraph::addRotation(int objectID,QQuaternion rotation)
-{
-    Transform t = graph[objectID].getTransform();
-    t.setRotation(rotation);
-    graph[objectID].setTransform(t);
-}
 
 SceneGraphNode SceneGraph::getNode(int objectID){
     return graph[objectID];
 }
 
-void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEngine *geometries, QMatrix4x4 projection, QQuaternion rotation)
-{
+
+void SceneGraph::addTranslation(int objectID,Translation translation){
+    Transform t = graph[objectID].getTransform();
+    t.addTranslation(translation);
+    graph[objectID].setTransform(t);
+}
+
+void SceneGraph::addRotation(int objectID,Rotation rotation){
+    Transform t = graph[objectID].getTransform();
+    t.setRotation(rotation);
+    graph[objectID].setTransform(t);
+}
+
+
+void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEngine *geometries, QMatrix4x4 projection, Rotation rotation){
     if(graph.size()<1){
         std::cout << "[SceneGraph::displaySceneElements] ERROR : Empty Graph !" << std::endl;
     }
@@ -69,18 +73,6 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
         if(current.isDrawable()){
             geometries->drawGeometry(current.getType(),program);
         }
-        /*
-        switch (current.getType()) {
-            case objectType::CUBE :
-            case objectType::SPHERE :
-                geometries->drawGeometry(current.getType(),program);
-                break;
-            case objectType::UNDEF :
-            default :
-                break;
-        }
-        */
-
 
         for(unsigned int i=0;i<graph.size();i++){
             //std::cout <<"current addr : " << currentAddr << ", graph["<< i<<"].getParent() : " << graph[i].getParent() << std::endl;
@@ -99,10 +91,8 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
         }
 
     }
-
-
-
 }
+
 
 void SceneGraph::manageCollision(){
     std::vector<int> collisions;
@@ -130,8 +120,8 @@ bool SceneGraph::isColliding(int id_a,int id_b){
 
             std::cout<<"<"<<id_a<<","<<id_b<<"> SphereXSphere collision"<<std::endl;
             //Distance between the two centers < 2 radius
-            QVector3D center_A = SGN_a.getTransform().getTranslation();
-            QVector3D center_B = SGN_b.getTransform().getTranslation();
+            Translation center_A = SGN_a.getTransform().getTranslation();
+            Translation center_B = SGN_b.getTransform().getTranslation();
             double C = sqrt( pow( center_A.x()- center_B.x(), 2 ) +
                          pow( center_A.y()- center_B.y(), 2 ) +
                          pow( center_A.z()- center_B.z(), 2 ) );
@@ -144,7 +134,7 @@ bool SceneGraph::isColliding(int id_a,int id_b){
 
             std::cout<<"<"<<id_a<<","<<id_b<<"> SphereXCube collision"<<std::endl;
 
-            QVector3D closestPoint = SGN_b.getTransform().getTranslation();
+            Translation closestPoint = SGN_b.getTransform().getTranslation();
             QVector3D direction = SGN_a.getTransform().getTranslation() - closestPoint;
             QMatrix3x3 rotation = SGN_b.getTransform().getRotationAsMatrix();
             for (int i = 0; i < 3; ++i) { //Going direction by direction
@@ -166,13 +156,35 @@ bool SceneGraph::isColliding(int id_a,int id_b){
             float radiusSq = SGN_a.getTransform().getScaling().x() * SGN_a.getTransform().getScaling().x();
             //std::cout <<"Dist = "<<distSq<<"/Rad = "<<radiusSq<<std::endl;
             return distSq < radiusSq;
-            //Todo
         }
     }else if(SGN_a.getType()==objectType::CUBE){
         if(SGN_b.getType()==objectType::SPHERE){
             //Cube X Sphere
             std::cout<<"<"<<id_a<<","<<id_b<<"> CubeXSphere collision"<<std::endl;
-            //Todo
+
+            Translation closestPoint = SGN_a.getTransform().getTranslation();
+            QVector3D direction = SGN_b.getTransform().getTranslation() - closestPoint;
+            QMatrix3x3 rotation = SGN_a.getTransform().getRotationAsMatrix();
+            for (int i = 0; i < 3; ++i) { //Going direction by direction
+                QVector3D axis(rotation(i,0),rotation(i,1),rotation(i,2));
+                float distance = QVector3D::dotProduct(direction, axis);
+                //std::cout<<"Distance"<<distance<<std::endl;
+
+                if (distance > SGN_a.getTransform().getTranslation()[i] + SGN_a.getTransform().getScaling()[i]) {
+                    distance = SGN_a.getTransform().getTranslation()[i] + SGN_a.getTransform().getScaling()[i];
+                }
+                if (distance < -(SGN_a.getTransform().getTranslation()[i] + SGN_a.getTransform().getScaling()[i])) {
+                    distance = -(SGN_a.getTransform().getTranslation()[i] + SGN_a.getTransform().getScaling()[i]);
+                }
+
+                closestPoint = closestPoint + (axis * distance);
+                //std::cout <<"ClosestPoint"<< closestPoint.x() <<","<<closestPoint.y()<<","<<closestPoint.z()<<std::endl;
+            }
+            float distSq = QVector3D::dotProduct(SGN_b.getTransform().getTranslation() - closestPoint,SGN_b.getTransform().getTranslation() - closestPoint);  //Dot product of himself
+            float radiusSq = SGN_b.getTransform().getScaling().x() * SGN_b.getTransform().getScaling().x();
+            //std::cout <<"Dist = "<<distSq<<"/Rad = "<<radiusSq<<std::endl;
+            return distSq < radiusSq;
+
         }else if(SGN_b.getType()==objectType::CUBE){
             //Cube X Cube
             std::cout<<"<"<<id_a<<","<<id_b<<"> CubeXCube collision"<<std::endl;
@@ -180,5 +192,4 @@ bool SceneGraph::isColliding(int id_a,int id_b){
         }
     }
     return false;
-
 }

@@ -60,12 +60,10 @@ MainWidget::MainWidget(QWidget *parent) :
     texture_ground(0),
     angularSpeed(0)
 {
-
-    freeCamera=true;
+    controlMode=ControlMode::BALL_CONTROL;
 }
 
-MainWidget::~MainWidget()
-{
+MainWidget::~MainWidget(){
     // Make sure the context is current when deleting the texture
     // and the buffers.
     makeCurrent();
@@ -73,23 +71,15 @@ MainWidget::~MainWidget()
     delete texture_ball;
     delete geometries;
     doneCurrent();
-
-
 }
 
-//! [0]
-void MainWidget::mousePressEvent(QMouseEvent *e)
-{
-    // Save mouse press position
+
+void MainWidget::mousePressEvent(QMouseEvent *e){
     mousePressPosition = QVector2D(e->localPos());
-
 }
 
-void MainWidget::mouseReleaseEvent(QMouseEvent *e)
-{
-    // Mouse release position - mouse press position
+void MainWidget::mouseReleaseEvent(QMouseEvent *e){
     QVector2D diff = QVector2D(e->localPos()) - mousePressPosition;
-
     // Rotation axis is perpendicular to the mouse position difference
     // vector
     QVector3D n = QVector3D(diff.y(), diff.x(), 0.0).normalized();
@@ -103,113 +93,90 @@ void MainWidget::mouseReleaseEvent(QMouseEvent *e)
     // Increase angular speed
     angularSpeed += 1*acc;
 }
-//! [0]
 
-//! [1]
 void MainWidget::timerEvent(QTimerEvent *)
 {
-    //if(freeCamera){
-        // Decrease angular speed (friction)
-        angularSpeed *= 0.9;
+    angularSpeed *= 0.9;
+    if (angularSpeed < 0.01) {
+        angularSpeed = 0.0;
+    } else {
+        // Update rotation
+        rotation = QQuaternion::fromAxisAndAngle(rotationAxis, angularSpeed) * rotation;
 
-        // Stop rotation when speed goes below threshold
-        if (angularSpeed < 0.01) {
-            angularSpeed = 0.0;
-        } else {
-            // Update rotation
-            rotation = QQuaternion::fromAxisAndAngle(rotationAxis, angularSpeed) * rotation;
-
-            // Request an update
-            update();
-        }
-    /*
-    }else{
-        float p,y,r;
-        rotation.getEulerAngles(&p,&y,&r);
-
-        rotation = QQuaternion::fromEulerAngles(0.0,y+1.0,0.0);
         update();
     }
-    */
 }
-//! [1]
 
 void MainWidget::keyPressEvent(QKeyEvent *event){
     QVector3D input(0.0f,0.0f,0.0f);
-    QVector3D inputb(0.0f,0.0f,0.0f);
     switch(event->key()){
-    case Qt::Key_Up :
-        inputb+=QVector3D(0.0f,0.0f,0.1f);
-        break;
-
-    case Qt::Key_Down :
-        inputb+=QVector3D(0.0f,0.0f,-0.1f);
-        break;
-
-    case Qt::Key_Left :
-        inputb+=QVector3D(0.1f,0.0f,0.0f);
-        break;
-
-    case Qt::Key_Right :
-        inputb+=QVector3D(-0.1f,0.0f,0.0f);
-        break;
-
     case Qt::Key_Z :
-        input+=QVector3D(0.0f,0.0f,0.1f);
+    case Qt::Key_Up :
+        input+=QVector3D(0.0f,0.0f,1.0/16.0);
         break;
 
     case Qt::Key_S :
-        input+=QVector3D(0.0f,0.0f,-0.1f);
+    case Qt::Key_Down :
+        input+=QVector3D(0.0f,0.0f,-1.0/16.0);
         break;
 
     case Qt::Key_Q :
-        input+=QVector3D(0.1f,0.0f,0.0f);
+    case Qt::Key_Left :
+        input+=QVector3D(1.0/16.0,0.0f,0.0f);
         break;
 
     case Qt::Key_D :
-        input+=QVector3D(-0.1f,0.0f,0.0f);
+    case Qt::Key_Right :
+        input+=QVector3D(-1.0/16.0,0.0f,0.0f);
         break;
 
     case Qt::Key_Shift  :
-        input+=QVector3D(0.0f,0.1f,0.0f);
-        //projection.translate(0,0.1,0);
+        input+=QVector3D(0.0f,1.0/16.0,0.0f);
         break;
 
     case Qt::Key_Space  :
-        input+=QVector3D(0.0f,-0.1f,0.0f);
-        //projection.translate(0,-0.1,0);
+        input+=QVector3D(0.0f,-1.0/16.0,0.0f);
         break;
+
     case Qt::Key_W:
         geometries->setWireframe(true);
         break;
-
     case Qt::Key_X:
         geometries->setWireframe(false);
         break;
-        /*
-    case Qt::Key_C :{
-        if(freeCamera){
-            rotation = QQuaternion::fromEulerAngles(-45.0,0,0);
-        }else{
-            angularSpeed=0.0;
-        }
-        freeCamera=!freeCamera;
-        break;
-    }*/
 
+    case Qt::Key_Tab:
+        switch (controlMode){
+        case ControlMode::CAM_CONTROL:
+            controlMode=ControlMode::BALL_CONTROL;
+            break;
+        case ControlMode::BALL_CONTROL:
+            controlMode=ControlMode::CAM_CONTROL;
+            break;
+        default:
+            std::cout<<"[mainwidget.cpp/keyPressEvent]Warning, Unknown Control Mode"<<std::endl;
+        }
+        break;
     default:
         break;
     }
 
-    projection.translate(input);
-    scene.getNode(SPHERE_NODE_ID).getTransform().setTranslation(inputb);
+    switch (controlMode){
+    case ControlMode::CAM_CONTROL:
+        projection.translate(input);
+        break;
+    case ControlMode::BALL_CONTROL:
+        scene.addTranslation(MAIN_NODE_ID,-input);
+        break;
+    default:
+        std::cout<<"[mainwidget.cpp/keyPressEvent]Warning, Unknown Control Mode"<<std::endl;
+    }
 
     update();
 }
 
 
-void MainWidget::initializeGL()
-{
+void MainWidget::initializeGL(){
     initializeOpenGLFunctions();
 
     glClearColor(0, 0, 0, 1);
@@ -217,26 +184,37 @@ void MainWidget::initializeGL()
     initShaders();
     initTextures();
 
-//! [2]
     // Enable depth buffer
     glEnable(GL_DEPTH_TEST);
 
     // Enable back face culling
     glEnable(GL_CULL_FACE);
-//! [2]
 
     geometries = new GeometryEngine;
 
     initScene();
     // Use QBasicTimer because its faster than QTimer
     timer.start(12, this);
+}
 
+void MainWidget::resizeGL(int w, int h)
+{
+    // Calculate aspect ratio
+    qreal aspect = qreal(w) / qreal(h ? h : 1);
+
+    // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
+    const qreal zNear = 1.0, zFar = 15.0, fov = 45.0;
+
+    // Reset projection
+    projection.setToIdentity();
+
+    // Set perspective projection
+    projection.perspective(fov, aspect, zNear, zFar);
 
 }
 
-//! [3]
-void MainWidget::initShaders()
-{
+
+void MainWidget::initShaders(){
     // Compile vertex shader
     if (!program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vshader.glsl"))
         close();
@@ -253,15 +231,11 @@ void MainWidget::initShaders()
     if (!program.bind())
         close();
 }
-//! [3]
 
-//! [4]
-void MainWidget::initTextures()
-{
-
+void MainWidget::initTextures(){
     texture_ground = new QOpenGLTexture(QImage(":/texture/sol.png").mirrored());
     texture_ground->setMinificationFilter(QOpenGLTexture::Nearest);
-    texture_ground->setMagnificationFilter(QOpenGLTexture::Linear);
+    texture_ground->setMagnificationFilter(QOpenGLTexture::Nearest);
     texture_ground->setWrapMode(QOpenGLTexture::Repeat);
 
     texture_ball = new QOpenGLTexture(QImage(":/texture/balldimpled.png").mirrored(true,false));
@@ -269,11 +243,9 @@ void MainWidget::initTextures()
     texture_ball->setMagnificationFilter(QOpenGLTexture::Linear);
     texture_ball->setWrapMode(QOpenGLTexture::Repeat);
 }
-//! [4]
 
 void MainWidget::initScene(){
     //Making the graph scene
-
     scene = SceneGraph();
 
     SceneGraphNode root = SceneGraphNode();
@@ -292,23 +264,7 @@ void MainWidget::initScene(){
     sphere_node2.setTransform(Transform( QVector3D(0.0,-1,0.0) , QVector3D(0.5,0.5,0.5) , QQuaternion(0.0,0.0,0.0,0.0) ));
     scene.AddNode(sphere_node2,&sphere_node2); //Item 3 on Scene
 }
-//! [5]
-void MainWidget::resizeGL(int w, int h)
-{
-    // Calculate aspect ratio
-    qreal aspect = qreal(w) / qreal(h ? h : 1);
 
-    // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 1.0, zFar = 15.0, fov = 45.0;
-
-    // Reset projection
-    projection.setToIdentity();
-
-    // Set perspective projection
-    projection.perspective(fov, aspect, zNear, zFar);
-
-}
-//! [5]
 
 void MainWidget::paintGL()
 {

@@ -15,7 +15,7 @@ void main()
 {
     // Calculate vertex position in screen space
     vec4 pos = a_position;
-    //pos.z = texture2D(height_map, a_texcoord).r;
+    // pos.z = texture2D(height_map, a_texcoord).r;
     gl_Position = mvp_matrix * pos;
 
 

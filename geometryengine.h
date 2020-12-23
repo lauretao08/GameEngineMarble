@@ -67,6 +67,9 @@ public:
     GeometryEngine();
     virtual ~GeometryEngine();
 
+    void setWireframe(bool b);
+    bool getWireframe();
+
     void drawGeometry   (int bufferID,QOpenGLShaderProgram *program);
 
     //Those are now just the same thing as drawGeometry
@@ -78,8 +81,6 @@ public:
     //Depreciated
     void drawPlaneGeometry(QOpenGLShaderProgram *program, int size);
 
-    void setWireframe(bool b);
-    bool getWireframe();
 private:
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;

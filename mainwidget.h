@@ -65,6 +65,7 @@
 #include <math.h>
 
 class GeometryEngine;
+enum ControlMode {BALL_CONTROL,CAM_CONTROL};
 
 class MainWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_1
 {
@@ -83,18 +84,18 @@ protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
 
-    void checkCollision();
-    void paintGL() override;
-
     void initShaders();
     void initTextures();
     void initScene();
 
-    GeometryEngine *geometries;
+    void paintGL() override;
+    void checkCollision();
+
+    //GeometryEngine *geometries;
 private:
     QBasicTimer timer;
     QOpenGLShaderProgram program;
-    //GeometryEngine *geometries;
+    GeometryEngine *geometries;
 
     QOpenGLTexture *texture_ground;
     QOpenGLTexture *texture_ball;
@@ -115,7 +116,7 @@ private:
 
     SceneGraph scene;
 
-    bool freeCamera;
+    ControlMode controlMode;
 };
 
 #endif // MAINWIDGET_H
