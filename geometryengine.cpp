@@ -60,6 +60,8 @@
 #include <fstream>
 #include <cmath>
 
+#define M_PI 3.14159265358979323846264338327950288
+
 struct VertexData{
     QVector3D position;
     QVector2D texCoord;
@@ -263,7 +265,7 @@ void GeometryEngine::initObjGeometry(int bufferID,std::string filename){
     int size_vertices = vertices.size();
     int size_indices = indices.size() * 3;
 
-    VertexData t_vertices[vertices.size()];
+    VertexData * t_vertices = new VertexData[vertices.size()];
     GLushort * t_indices = new GLushort[indices.size() * 3];
 
     for(size_t i = 0; i < vertices.size(); i++){

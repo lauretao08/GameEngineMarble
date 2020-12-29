@@ -56,6 +56,7 @@
 #include <QOpenGLBuffer>
 #include <string>
 #include <vector>
+#include <math.h>
 
 enum objectType {UNDEF=-1,
                  SPHERE,    //0
