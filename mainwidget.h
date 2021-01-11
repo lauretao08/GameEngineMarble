@@ -117,6 +117,9 @@ private:
     SceneGraph scene;
 
     ControlMode controlMode;
+
+    float currentTime;
+
 };
 
 #endif // MAINWIDGET_H

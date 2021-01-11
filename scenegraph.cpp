@@ -57,6 +57,14 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
 
     QMatrix4x4 matrix;
 
+    /* Calcul dt for update force */
+    previousTime = currentTime;
+    currentTime = GetCurrentTime();
+    float delta_t = currentTime - previousTime;
+    std::cout<<"PrviousTime : "<<previousTime<<"   CurrentTime : "<<currentTime<<"   delta_t : "<<delta_t<<std::endl;
+    if(delta_t >0.15f) delta_t = 0.15f; //lock down dt
+
+
     while(ongoing){
         matrix.setToIdentity();
         matrix.translate(0.0, 0.0, -5.0);
@@ -65,6 +73,9 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
         matrix.translate(current.getTransform().getTranslation());
         matrix.rotate(current.getTransform().getRotation());
         matrix.scale(current.getTransform().getScaling());
+
+        //******** UpdateForce ******
+        updateForce(matrix, delta_t);
 
         // Set modelview-projection matrix
         program->setUniformValue("mvp_matrix", projection * matrix);
@@ -93,6 +104,13 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
     }
 }
 
+void SceneGraph::updateForce(QMatrix4x4 & matrix, float delta_t){
+    /* à Mettre à jour les position / velocity
+        p = p + v * dt;
+        v = v + g * dt;
+    */
+    //matrix.translate(0.0,0.0,0.0);
+}
 
 void SceneGraph::manageCollision(){
     std::vector<int> collisions;

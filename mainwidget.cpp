@@ -61,6 +61,7 @@ MainWidget::MainWidget(QWidget *parent) :
     angularSpeed(0)
 {
     controlMode=ControlMode::BALL_CONTROL;
+    currentTime = GetCurrentTime();
 }
 
 MainWidget::~MainWidget(){
@@ -183,34 +184,27 @@ void MainWidget::initializeGL(){
 
     initShaders();
     initTextures();
-
-    // Enable depth buffer
     glEnable(GL_DEPTH_TEST);
-
-    // Enable back face culling
     glEnable(GL_CULL_FACE);
 
     geometries = new GeometryEngine;
 
     initScene();
-    // Use QBasicTimer because its faster than QTimer
     timer.start(12, this);
 }
 
 void MainWidget::resizeGL(int w, int h)
 {
-    // Calculate aspect ratio
     qreal aspect = qreal(w) / qreal(h ? h : 1);
-
-    // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 1.0, zFar = 15.0, fov = 45.0;
-
-    // Reset projection
+    const qreal zNear = 0.1, zFar = 30.0, fov = 50.0;
     projection.setToIdentity();
-
-    // Set perspective projection
     projection.perspective(fov, aspect, zNear, zFar);
 
+    //Légèrement modifier la position de caméra
+    QMatrix4x4 view;
+    view.setToIdentity();
+    view.translate(0.0, -5.0, -10.0);
+    projection *= view;
 }
 
 
@@ -263,6 +257,21 @@ void MainWidget::initScene(){
     SceneGraphNode sphere_node2 = SceneGraphNode(&sphere_node, objectType::SPHERE);
     sphere_node2.setTransform(Transform( QVector3D(0.0,-1,0.0) , QVector3D(0.5,0.5,0.5) , QQuaternion(0.0,0.0,0.0,0.0) ));
     scene.AddNode(sphere_node2,&sphere_node2); //Item 3 on Scene
+
+/*  Level design (caché pour l'instant pour tester la physique)
+    SceneGraphNode cube_node2 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node2.setTransform(Transform( QVector3D(-0.0,0.5,-4.0) , QVector3D(2,1,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    scene.AddNode(cube_node2,&cube_node2); //Item 4
+
+    SceneGraphNode cube_node3 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node3.setTransform(Transform( QVector3D(4.0,0.5,-4.0) , QVector3D(2,1,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    scene.AddNode(cube_node3,&cube_node3); //Item 5
+
+    SceneGraphNode cube_node4 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node4.setTransform(Transform( QVector3D(8.0,0.5,-4.0) , QVector3D(2,1,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    scene.AddNode(cube_node4,&cube_node4); //Item 6
+    */
+
 }
 
 
@@ -276,8 +285,11 @@ void MainWidget::paintGL()
     texture_ground->bind(objectType::CUBE);
 
 
+    //std::cout<<GetCurrentTime()<<std::endl;
     scene.manageCollision();
+    scene.updateCurrentTime(currentTime);
     scene.displaySceneElements(&program, geometries ,projection, rotation);
+    update();
 }
 
 

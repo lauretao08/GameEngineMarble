@@ -37,6 +37,12 @@ public:
 
     void manageCollision();
     bool isColliding(int id_a,int id_b);
+
+    /**Force related**/
+    void updateForce(QMatrix4x4 & matrix, float delta_t);
+    void updateCurrentTime(float time){currentTime = time;}
+    float previousTime = 0.0;
+    float currentTime;
 };
 
 #endif // SCENEGRAPH_H
