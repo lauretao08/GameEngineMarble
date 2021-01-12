@@ -5,6 +5,8 @@
 
 SceneGraph::SceneGraph(){
     rootdefined = false;
+    currentTime = GetCurrentTime();
+    updateCurrentTime();
 }
 
 void SceneGraph::AddRoot(SceneGraphNode root, SceneGraphNode *addrRoot){
@@ -127,17 +129,17 @@ void SceneGraph::updateForce(float delta_t){
     */
     //matrix.translate(0.0,0.0,0.0);
     delta_t/=1000.0;
-    QVector3D delta_p = getNode(MAIN_NODE_ID).velocity * delta_t;
-   //std::cout<<"Delta p  : ("<<delta_p.x()<<","<<delta_p.y()<<","<<delta_p.z()<<")"<<std::endl;
-   std::cout<<"Velocity : ("<< getNode(MAIN_NODE_ID).velocity.x()<<","<< getNode(MAIN_NODE_ID).velocity.y()<<","<< getNode(MAIN_NODE_ID).velocity.z()<<")"<<std::endl;
-   //std::cout<<delta_t<<std::endl;
-   //matrix.translate(delta_p);
-   //getNode(MAIN_NODE_ID).getTransform().addTranslation(delta_p);
-   addTranslation(MAIN_NODE_ID,delta_p);
+    QVector3D delta_p = (getNode(MAIN_NODE_ID).velocity + getNode(MAIN_NODE_ID).gravity) * delta_t;
+    //std::cout<<"Delta p  : ("<<delta_p.x()<<","<<delta_p.y()<<","<<delta_p.z()<<")"<<std::endl;
+    //std::cout<<"Velocity : ("<< getNode(MAIN_NODE_ID).velocity.x()<<","<< getNode(MAIN_NODE_ID).velocity.y()<<","<< getNode(MAIN_NODE_ID).velocity.z()<<")"<<std::endl;
+    //std::cout<<delta_t<<std::endl;
+    //matrix.translate(delta_p);
+    //getNode(MAIN_NODE_ID).getTransform().addTranslation(delta_p);
+    addTranslation(MAIN_NODE_ID,delta_p);
 
-   //**** Mettre à jour la vélocité ****
+   //**** Mettre à jour la vitesse ****
    if(getNode(MAIN_NODE_ID).velocity.lengthSquared()>VELOCITY_THRESHOLD){
-       QVector3D friction = -0.15 * getNode(MAIN_NODE_ID).velocity;
+       QVector3D friction = FRICTION_STRENGTH * getNode(MAIN_NODE_ID).velocity;
        addVelocity(MAIN_NODE_ID,friction * delta_t);
    }else{
        setVelocity(MAIN_NODE_ID,QVector3D(0.0,0.0,0.0));
@@ -150,14 +152,26 @@ void SceneGraph::updateForce(float delta_t){
 void SceneGraph::manageCollision(){
     std::vector<int> collisions;
     for(int i=0;i<graph.size();i++){
-        if(isColliding(MAIN_NODE_ID,i)){
+        Translation ContactPoint=Translation(0.0,0.0,0.0);
+        if(isColliding(MAIN_NODE_ID,i,&ContactPoint)){
             collisions.push_back(i);
-            //std::cout<<"Contact "<<std::endl;
+            //std::cout<<"Contact : ("<< ContactPoint.x() <<","<<ContactPoint.y() <<","<<ContactPoint.z() <<")"<<std::endl;
+
+            //ContactPoint-Centre => Direction de propulsion
+            QVector3D force = ContactPoint-getNode(MAIN_NODE_ID).getTransform().getTranslation();
+            //Rayon de la sphere - Norme de la direction => Puissance souhaité
+            float puissance =(float)getNode(MAIN_NODE_ID).getTransform().getScaling().x() - (float)force.length();
+            force.normalize();
+            addTranslation(MAIN_NODE_ID,-force*puissance);
+            force*=(float)puissance * BOUNCE_MODIFIER;
+            std::cout<<"Force : ("<< force.x() <<","<<force.y() <<","<<force.z() <<")"<<std::endl;
+
+            addForce(MAIN_NODE_ID,-force);
         }
     }
 }
 
-bool SceneGraph::isColliding(int id_a,int id_b){
+bool SceneGraph::isColliding(int id_a,int id_b,Translation *contactPoint){
     if(!getNode(id_a).isCollidable() || !getNode(id_b).isCollidable()){
         return false;
     }
@@ -166,7 +180,6 @@ bool SceneGraph::isColliding(int id_a,int id_b){
     }
     SceneGraphNode SGN_a = getNode(id_a);
     SceneGraphNode SGN_b = getNode(id_b);
-
     if(SGN_a.getType()==objectType::SPHERE){
         if(SGN_b.getType()==objectType::SPHERE){
             //Sphere X Sphere collision
@@ -180,6 +193,9 @@ bool SceneGraph::isColliding(int id_a,int id_b){
                          pow( center_A.z()- center_B.z(), 2 ) );
             double R =  SGN_a.getTransform().getScaling().x() + SGN_b.getTransform().getScaling().x();
             //std::cout <<"C = "<<C<<"/R = "<<R<<std::endl;
+            if(C<R){
+                *contactPoint=center_B-center_A; //NOT COMPLETE
+            }
             return (C<R);
 
         }else if(SGN_b.getType()==objectType::CUBE){
@@ -208,6 +224,10 @@ bool SceneGraph::isColliding(int id_a,int id_b){
             float distSq = QVector3D::dotProduct(SGN_a.getTransform().getTranslation() - closestPoint,SGN_a.getTransform().getTranslation() - closestPoint);  //Dot product of himself
             float radiusSq = SGN_a.getTransform().getScaling().x() * SGN_a.getTransform().getScaling().x();
             //std::cout <<"Dist = "<<distSq<<"/Rad = "<<radiusSq<<std::endl;
+
+            if(distSq < radiusSq){
+                *contactPoint=closestPoint;
+            }
             return distSq < radiusSq;
         }
     }else if(SGN_a.getType()==objectType::CUBE){

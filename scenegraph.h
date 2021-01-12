@@ -9,9 +9,12 @@
 
 #define SPHERE_NODE_ID 1
 #define CUBE_NODE_ID 2
-#define VELOCITY_THRESHOLD 0.01
 
 #define MAIN_NODE_ID SPHERE_NODE_ID
+
+#define VELOCITY_THRESHOLD 0.04
+#define FRICTION_STRENGTH -0.30
+#define BOUNCE_MODIFIER 0.8
 
 class SceneGraph{
 private:
@@ -40,7 +43,7 @@ public:
     void displaySceneElements(QOpenGLShaderProgram *program,GeometryEngine *geometries, QMatrix4x4 projection, Rotation rotation);
 
     void manageCollision();
-    bool isColliding(int id_a,int id_b);
+    bool isColliding(int id_a,int id_b,Translation *);
 
     /**Force related**/
     void updateForce(float delta_t);

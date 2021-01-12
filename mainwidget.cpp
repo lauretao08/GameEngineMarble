@@ -61,7 +61,7 @@ MainWidget::MainWidget(QWidget *parent) :
     angularSpeed(0)
 {
     controlMode=ControlMode::BALL_CONTROL;
-    //currentTime = GetCurrentTime();
+
 }
 
 MainWidget::~MainWidget(){
@@ -259,7 +259,7 @@ void MainWidget::initScene(){
     scene.AddRoot(root,&root); //Item 0 on scene
 
     SceneGraphNode sphere_node = SceneGraphNode(&root, objectType::SPHERE);
-    sphere_node.setTransform(Transform( QVector3D(2.0,1.0,0.0) , QVector3D(1.0,1.0,1.0) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    sphere_node.setTransform(Transform( QVector3D(0.0,3.0,0.0) , QVector3D(1.0,1.0,1.0) , QQuaternion(0.0,0.0,0.0,0.0) ));
     scene.AddNode(sphere_node,&sphere_node); //Item 1 on Scene
     sphere_node.mobile = true;
 
