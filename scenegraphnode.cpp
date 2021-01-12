@@ -49,3 +49,6 @@ void SceneGraphNode::setTransform(Transform t){
 void SceneGraphNode::addTransform(Transform t){
     transform.combineWith(t);
 }
+void SceneGraphNode::addTranslate(Translation t){
+    transform.addTranslation(t);
+}

@@ -35,6 +35,7 @@ public:
     SceneGraphNode getNode(int);
 
     void addForce(int objectID, QVector3D force);
+    void setTranslation(int objectID,Translation translation);
     void addTranslation(int objectID,Translation translation);
     void addRotation(int objectID,Rotation rotation);
     void setVelocity(int objectID,QVector3D velocity);
@@ -43,8 +44,10 @@ public:
     void displaySceneElements(QOpenGLShaderProgram *program,GeometryEngine *geometries, QMatrix4x4 projection, Rotation rotation);
 
     void manageCollision();
-    bool isColliding(int id_a,int id_b,Translation *);
+    bool predictCollision(QVector3D predicted_force);
 
+    bool isColliding(int id_a,int id_b,Translation *);
+    bool isColliding(int id_a,int id_b,Translation *,QVector3D);
     /**Force related**/
     void updateForce(float delta_t);
     void updateCurrentTime(){previousTime=currentTime;currentTime = GetCurrentTime();}

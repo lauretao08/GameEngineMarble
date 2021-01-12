@@ -156,6 +156,9 @@ void MainWidget::keyPressEvent(QKeyEvent *event){
     case Qt::Key_X:
         geometries->setWireframe(false);
         break;
+    case Qt::Key_R:
+        scene.setTranslation(MAIN_NODE_ID,QVector3D(0.0,3.0,0.0));
+        break;
 
     case Qt::Key_Tab:
         switch (controlMode){
@@ -264,7 +267,7 @@ void MainWidget::initScene(){
     sphere_node.mobile = true;
 
     SceneGraphNode cube_node = SceneGraphNode(&root, objectType::CUBE);
-    cube_node.setTransform(Transform( QVector3D(0.0,0.0,0.0) , QVector3D(2,0.5,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    cube_node.setTransform(Transform( QVector3D(0.0,0.0,0.0) , QVector3D(2,0.5,2) , QQuaternion().fromEulerAngles(0.0,0.0,15.0) ));
     scene.AddNode(cube_node,&cube_node); //Item 2
 
     /*SceneGraphNode sphere_node2 = SceneGraphNode(&sphere_node, objectType::SPHERE);
