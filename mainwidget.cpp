@@ -110,30 +110,25 @@ void MainWidget::timerEvent(QTimerEvent *)
 
 void MainWidget::keyPressEvent(QKeyEvent *event){
     QVector3D input(0.0f,0.0f,0.0f);
-    QVector3D force(0.0,0.0,0.0);
     switch(event->key()){
     case Qt::Key_Z :
     case Qt::Key_Up :
         input+=QVector3D(0.0f,0.0f,1.0/16.0);
-        force+=QVector3D(0.0,0.0,1.0);
         break;
 
     case Qt::Key_S :
     case Qt::Key_Down :
         input+=QVector3D(0.0f,0.0f,-1.0/16.0);
-        force+=QVector3D(0.0,0.0,-1.0);
         break;
 
     case Qt::Key_Q :
     case Qt::Key_Left :
         input+=QVector3D(1.0/16.0,0.0f,0.0f);
-        force+=QVector3D(1.0,0.0,0.0);
         break;
 
     case Qt::Key_D :
     case Qt::Key_Right :
         input+=QVector3D(-1.0/16.0,0.0f,0.0f);
-        force+=QVector3D(-1.0,0.0,0.0);
         break;
 
     case Qt::Key_Shift  :
@@ -172,8 +167,7 @@ void MainWidget::keyPressEvent(QKeyEvent *event){
         projection.translate(input);
         break;
     case ControlMode::BALL_CONTROL:
-        //scene.addTranslation(MAIN_NODE_ID,-input);
-        scene.addForce(MAIN_NODE_ID, -force);
+        scene.addTranslation(MAIN_NODE_ID,-input);
         break;
     default:
         std::cout<<"[mainwidget.cpp/keyPressEvent]Warning, Unknown Control Mode"<<std::endl;
@@ -254,18 +248,16 @@ void MainWidget::initScene(){
 
     SceneGraphNode sphere_node = SceneGraphNode(&root, objectType::SPHERE);
     sphere_node.setTransform(Transform( QVector3D(2.0,1.0,0.0) , QVector3D(1.0,1.0,1.0) , QQuaternion(0.0,0.0,0.0,0.0) ));
-    sphere_node.mobile = true;
-    //sphere_node.addForce();
     scene.AddNode(sphere_node,&sphere_node); //Item 1 on Scene
 
     SceneGraphNode cube_node = SceneGraphNode(&root, objectType::CUBE);
     cube_node.setTransform(Transform( QVector3D(0.0,0.0,0.0) , QVector3D(2,0.5,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
     scene.AddNode(cube_node,&cube_node); //Item 2
-/*
+
     SceneGraphNode sphere_node2 = SceneGraphNode(&sphere_node, objectType::SPHERE);
     sphere_node2.setTransform(Transform( QVector3D(0.0,-1,0.0) , QVector3D(0.5,0.5,0.5) , QQuaternion(0.0,0.0,0.0,0.0) ));
     scene.AddNode(sphere_node2,&sphere_node2); //Item 3 on Scene
-*/
+
 /*  Level design (caché pour l'instant pour tester la physique)
     SceneGraphNode cube_node2 = SceneGraphNode(&root, objectType::CUBE);
     cube_node2.setTransform(Transform( QVector3D(-0.0,0.5,-4.0) , QVector3D(2,1,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
@@ -293,6 +285,7 @@ void MainWidget::paintGL()
     texture_ground->bind(objectType::CUBE);
 
 
+    //std::cout<<GetCurrentTime()<<std::endl;
     scene.manageCollision();
     scene.updateCurrentTime(currentTime);
     scene.displaySceneElements(&program, geometries ,projection, rotation);

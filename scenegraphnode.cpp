@@ -4,7 +4,6 @@ SceneGraphNode::SceneGraphNode(){
     this->type = objectType::UNDEF;
     this->Drawable = false;
     this->Collidable = false;
-    this->mobile = false;
 }
 
 SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, objectType type){
