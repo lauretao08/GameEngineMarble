@@ -28,6 +28,11 @@ SceneGraphNode SceneGraph::getNode(int objectID){
 }
 
 
+void SceneGraph::addForce(int objectID, QVector3D force){
+    Transform t = graph[objectID].getTransform();
+    graph[objectID].velocity+=force;
+}
+
 void SceneGraph::addTranslation(int objectID,Translation translation){
     Transform t = graph[objectID].getTransform();
     t.addTranslation(translation);
@@ -74,12 +79,13 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
         matrix.rotate(current.getTransform().getRotation());
         matrix.scale(current.getTransform().getScaling());
 
+        std::cout<<"Velocity : ("<<current.velocity.x()<<","<<current.velocity.y()<<","<<current.velocity.z()<<")"<<std::endl;
         //******** UpdateForce ******
-        updateForce(matrix, delta_t);
+        updateForce(matrix,current, delta_t);
+
 
         // Set modelview-projection matrix
         program->setUniformValue("mvp_matrix", projection * matrix);
-
 
         if(current.isDrawable()){
             geometries->drawGeometry(current.getType(),program);
@@ -100,16 +106,29 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
         }else{
             ongoing=false;
         }
-
     }
+
+
+
+
+
 }
 
-void SceneGraph::updateForce(QMatrix4x4 & matrix, float delta_t){
+void SceneGraph::updateForce(QMatrix4x4 & matrix, SceneGraphNode & current, float delta_t){
     /* à Mettre à jour les position / velocity
         p = p + v * dt;
-        v = v + g * dt;
+        v = v + friction * dt + gravity * dt;
     */
-    //matrix.translate(0.0,0.0,0.0);
+
+    QVector3D delta_p = current.velocity * delta_t;
+    //std::cout<<"Delta p  : ("<<delta_p.x()<<","<<delta_p.y()<<","<<delta_p.z()<<")"<<std::endl;
+    //std::cout<<"Velocity : ("<<current.velocity.x()<<","<<current.velocity.y()<<","<<current.velocity.z()<<")"<<std::endl;
+    matrix.translate(delta_p);
+
+    //**** Mettre à jour la vélocité ****
+    QVector3D friction = -0.15 * current.velocity;
+    current.velocity+= friction * delta_t;
+
 }
 
 void SceneGraph::manageCollision(){
