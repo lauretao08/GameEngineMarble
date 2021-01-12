@@ -136,7 +136,7 @@ bool SceneGraph::isColliding(int id_a,int id_b){
         if(SGN_b.getType()==objectType::SPHERE){
             //Sphere X Sphere collision
 
-            std::cout<<"<"<<id_a<<","<<id_b<<"> SphereXSphere collision"<<std::endl;
+            //std::cout<<"<"<<id_a<<","<<id_b<<"> SphereXSphere collision"<<std::endl;
             //Distance between the two centers < 2 radius
             Translation center_A = SGN_a.getTransform().getTranslation();
             Translation center_B = SGN_b.getTransform().getTranslation();
@@ -150,7 +150,7 @@ bool SceneGraph::isColliding(int id_a,int id_b){
         }else if(SGN_b.getType()==objectType::CUBE){
             //Sphere X Cube
 
-            std::cout<<"<"<<id_a<<","<<id_b<<"> SphereXCube collision"<<std::endl;
+            //std::cout<<"<"<<id_a<<","<<id_b<<"> SphereXCube collision"<<std::endl;
 
             Translation closestPoint = SGN_b.getTransform().getTranslation();
             QVector3D direction = SGN_a.getTransform().getTranslation() - closestPoint;
@@ -178,7 +178,7 @@ bool SceneGraph::isColliding(int id_a,int id_b){
     }else if(SGN_a.getType()==objectType::CUBE){
         if(SGN_b.getType()==objectType::SPHERE){
             //Cube X Sphere
-            std::cout<<"<"<<id_a<<","<<id_b<<"> CubeXSphere collision"<<std::endl;
+            //std::cout<<"<"<<id_a<<","<<id_b<<"> CubeXSphere collision"<<std::endl;
 
             Translation closestPoint = SGN_a.getTransform().getTranslation();
             QVector3D direction = SGN_b.getTransform().getTranslation() - closestPoint;
@@ -205,7 +205,7 @@ bool SceneGraph::isColliding(int id_a,int id_b){
 
         }else if(SGN_b.getType()==objectType::CUBE){
             //Cube X Cube
-            std::cout<<"<"<<id_a<<","<<id_b<<"> CubeXCube collision"<<std::endl;
+            //std::cout<<"<"<<id_a<<","<<id_b<<"> CubeXCube collision"<<std::endl;
             //Todo
         }
     }
