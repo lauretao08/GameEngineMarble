@@ -91,6 +91,8 @@ protected:
     void paintGL() override;
     void checkCollision();
 
+
+
     //GeometryEngine *geometries;
 private:
     QBasicTimer timer;

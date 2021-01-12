@@ -61,7 +61,7 @@ MainWidget::MainWidget(QWidget *parent) :
     angularSpeed(0)
 {
     controlMode=ControlMode::BALL_CONTROL;
-    currentTime = GetCurrentTime();
+    //currentTime = GetCurrentTime();
 }
 
 MainWidget::~MainWidget(){
@@ -104,8 +104,10 @@ void MainWidget::timerEvent(QTimerEvent *)
         // Update rotation
         rotation = QQuaternion::fromAxisAndAngle(rotationAxis, angularSpeed) * rotation;
 
-        update();
+
     }
+
+    update();
 }
 
 void MainWidget::keyPressEvent(QKeyEvent *event){
@@ -116,24 +118,28 @@ void MainWidget::keyPressEvent(QKeyEvent *event){
     case Qt::Key_Up :
         input+=QVector3D(0.0f,0.0f,1.0/16.0);
         force+=QVector3D(0.0,0.0,1.0);
+        std::cout<<"HAUT"<<std::endl;
         break;
 
     case Qt::Key_S :
     case Qt::Key_Down :
         input+=QVector3D(0.0f,0.0f,-1.0/16.0);
         force+=QVector3D(0.0,0.0,-1.0);
+        std::cout<<"BAS"<<std::endl;
         break;
 
     case Qt::Key_Q :
     case Qt::Key_Left :
         input+=QVector3D(1.0/16.0,0.0f,0.0f);
         force+=QVector3D(1.0,0.0,0.0);
+        std::cout<<"GAUCHE"<<std::endl;
         break;
 
     case Qt::Key_D :
     case Qt::Key_Right :
         input+=QVector3D(-1.0/16.0,0.0f,0.0f);
         force+=QVector3D(-1.0,0.0,0.0);
+        std::cout<<"DROITE"<<std::endl;
         break;
 
     case Qt::Key_Shift  :
@@ -179,7 +185,7 @@ void MainWidget::keyPressEvent(QKeyEvent *event){
         std::cout<<"[mainwidget.cpp/keyPressEvent]Warning, Unknown Control Mode"<<std::endl;
     }
 
-    update();
+    //update();
 }
 
 
@@ -261,9 +267,9 @@ void MainWidget::initScene(){
     cube_node.setTransform(Transform( QVector3D(0.0,0.0,0.0) , QVector3D(2,0.5,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
     scene.AddNode(cube_node,&cube_node); //Item 2
 
-    SceneGraphNode sphere_node2 = SceneGraphNode(&sphere_node, objectType::SPHERE);
+    /*SceneGraphNode sphere_node2 = SceneGraphNode(&sphere_node, objectType::SPHERE);
     sphere_node2.setTransform(Transform( QVector3D(0.0,-1,0.0) , QVector3D(0.5,0.5,0.5) , QQuaternion(0.0,0.0,0.0,0.0) ));
-    scene.AddNode(sphere_node2,&sphere_node2); //Item 3 on Scene
+    scene.AddNode(sphere_node2,&sphere_node2);*/ //Item 3 on Scene
 
 /*  Level design (caché pour l'instant pour tester la physique)
     SceneGraphNode cube_node2 = SceneGraphNode(&root, objectType::CUBE);
@@ -292,14 +298,17 @@ void MainWidget::paintGL()
     texture_ground->bind(objectType::CUBE);
 
 
-    //std::cout<<GetCurrentTime()<<std::endl;
+    //std::cout<<"previousTime : " << scene.previousTime << ", currentTime : " << scene.currentTime << ", deltaTime : " << scene.currentTime-scene.previousTime <<std::endl;
     scene.manageCollision();
-    scene.updateCurrentTime(currentTime);
+    scene.updateCurrentTime();
+    scene.updateForce(scene.currentTime-scene.previousTime);
     scene.displaySceneElements(&program, geometries ,projection, rotation);
-    update();
+    //update();
 }
 
 
 void MainWidget::checkCollision(){
     scene.manageCollision();
 }
+
+

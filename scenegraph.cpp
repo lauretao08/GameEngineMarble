@@ -2,6 +2,7 @@
 #include <iostream>
 #include <QVector3D>
 
+
 SceneGraph::SceneGraph(){
     rootdefined = false;
 }
@@ -28,8 +29,9 @@ SceneGraphNode SceneGraph::getNode(int objectID){
 }
 
 void SceneGraph::addForce(int objectID, QVector3D force){
-    Transform t = graph[objectID].getTransform();
+
     graph[objectID].velocity+=force;
+
 }
 
 void SceneGraph::addTranslation(int objectID,Translation translation){
@@ -42,6 +44,16 @@ void SceneGraph::addRotation(int objectID,Rotation rotation){
     Transform t = graph[objectID].getTransform();
     t.setRotation(rotation);
     graph[objectID].setTransform(t);
+}
+
+void SceneGraph::setVelocity(int objectID, QVector3D velocity)
+{
+    graph[objectID].velocity=velocity;
+}
+
+void SceneGraph::addVelocity(int objectID, QVector3D velocity)
+{
+    graph[objectID].velocity+=velocity;
 }
 
 
@@ -62,11 +74,11 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
     QMatrix4x4 matrix;
 
     /* Calcul dt for update force */
-    previousTime = currentTime;
+    /*previousTime = currentTime;
     currentTime = GetCurrentTime();
     float delta_t = currentTime - previousTime;
     std::cout<<"PrviousTime : "<<previousTime<<"   CurrentTime : "<<currentTime<<"   delta_t : "<<delta_t<<std::endl;
-    if(delta_t >0.15f) delta_t = 0.15f; //lock down dt
+    if(delta_t >0.15f) delta_t = 0.15f; //lock down dt*/
 
 
     while(ongoing){
@@ -79,7 +91,7 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
         matrix.scale(current.getTransform().getScaling());
 
         //******** UpdateForce ******
-        updateForce(matrix, current, delta_t);
+        //updateForce(matrix, current, delta_t);
 
         // Set modelview-projection matrix
         program->setUniformValue("mvp_matrix", projection * matrix);
@@ -108,20 +120,31 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
     }
 }
 
-void SceneGraph::updateForce(QMatrix4x4 & matrix,SceneGraphNode & current, float delta_t){
+void SceneGraph::updateForce(float delta_t){
     /* à Mettre à jour les position / velocity
         p = p + v * dt;
         v = v + friction * dt + gravity * dt;
     */
     //matrix.translate(0.0,0.0,0.0);
-    QVector3D delta_p = current.velocity * delta_t;
+    delta_t/=1000.0;
+    QVector3D delta_p = getNode(MAIN_NODE_ID).velocity * delta_t;
    //std::cout<<"Delta p  : ("<<delta_p.x()<<","<<delta_p.y()<<","<<delta_p.z()<<")"<<std::endl;
-   //std::cout<<"Velocity : ("<<current.velocity.x()<<","<<current.velocity.y()<<","<<current.velocity.z()<<")"<<std::endl;
-   matrix.translate(delta_p);
+   std::cout<<"Velocity : ("<< getNode(MAIN_NODE_ID).velocity.x()<<","<< getNode(MAIN_NODE_ID).velocity.y()<<","<< getNode(MAIN_NODE_ID).velocity.z()<<")"<<std::endl;
+   //std::cout<<delta_t<<std::endl;
+   //matrix.translate(delta_p);
+   //getNode(MAIN_NODE_ID).getTransform().addTranslation(delta_p);
+   addTranslation(MAIN_NODE_ID,delta_p);
 
    //**** Mettre à jour la vélocité ****
-   QVector3D friction = -0.15 * current.velocity;
-   current.velocity+= friction * delta_t;
+   if(getNode(MAIN_NODE_ID).velocity.lengthSquared()>VELOCITY_THRESHOLD){
+       QVector3D friction = -0.15 * getNode(MAIN_NODE_ID).velocity;
+       addVelocity(MAIN_NODE_ID,friction * delta_t);
+   }else{
+       setVelocity(MAIN_NODE_ID,QVector3D(0.0,0.0,0.0));
+   }
+
+
+
 }
 
 void SceneGraph::manageCollision(){
@@ -129,7 +152,7 @@ void SceneGraph::manageCollision(){
     for(int i=0;i<graph.size();i++){
         if(isColliding(MAIN_NODE_ID,i)){
             collisions.push_back(i);
-            std::cout<<"Contact "<<std::endl;
+            //std::cout<<"Contact "<<std::endl;
         }
     }
 }
