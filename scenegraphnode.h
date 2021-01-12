@@ -24,6 +24,7 @@ private:
 
 
 public:
+    bool mobile;
     SceneGraphNode();
     SceneGraphNode(SceneGraphNode* parent, objectType type);
 
@@ -38,9 +39,9 @@ public:
     void addTransform(Transform t);
 
     /**Force related**/
-    QVector3D velocity = QVector3D(0.0,0.0,1.0);
-    QVector3D position;
+    QVector3D velocity = QVector3D(0.0,0.0,0.0);
     QVector3D gravity = QVector3D(0.0,-1.0,0.0);
+    //QVector3D position;
 
 };
 
