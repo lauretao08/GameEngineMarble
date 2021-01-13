@@ -27,6 +27,11 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, objectType type){
         this->Collidable = true;
         this->Static = true;
         break;
+    case objectType::TRIGGER:
+        this->Drawable = false;
+        this->Collidable = true;
+        this->Static = true;
+        break;
     }
 }
 
@@ -65,4 +70,9 @@ void SceneGraphNode::addTransform(Transform t){
 }
 void SceneGraphNode::addTranslate(Translation t){
     transform.addTranslation(t);
+}
+
+void SceneGraphNode::setTranslate(QVector3D translate)
+{
+    transform.setTranslation(translate);
 }

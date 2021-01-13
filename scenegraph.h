@@ -16,9 +16,9 @@
 #define FRICTION_STRENGTH -0.30
 #define BOUNCE_MODIFIER 0.8
 #define GRAVITY_MODIFIER 2.0
-#define VELOCITY_CAP_X 2.0
-#define VELOCITY_CAP_Y 2.0
-#define VELOCITY_CAP_Z 2.0
+#define VELOCITY_CAP_X 3.0
+#define VELOCITY_CAP_Y 3.0
+#define VELOCITY_CAP_Z 3.0
 
 
 class SceneGraph{
@@ -54,6 +54,8 @@ public:
 
     bool isColliding(int id_a,int id_b,Translation *);
     bool isColliding(int id_a,int id_b,Translation *,QVector3D);
+
+    void respawn();
 
     /**Force related**/
     void updateForce(float delta_t);

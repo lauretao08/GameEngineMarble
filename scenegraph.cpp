@@ -177,19 +177,25 @@ void SceneGraph::manageCollision(){
     for(int i=0;i<graph.size();i++){//Pour chaque objet de la scene
         Translation ContactPoint=Translation(0.0,0.0,0.0);
         if(isColliding(MAIN_NODE_ID,i,&ContactPoint)){      //Si l'ojet rentre en collision avec la sphere personnage
-            //collisions.push_back(i);
-            //std::cout<<"Contact : ("<< ContactPoint.x() <<","<<ContactPoint.y() <<","<<ContactPoint.z() <<")"<<std::endl;
+            if(getNode(i).getType()!=objectType::TRIGGER){
 
-            //Rayon de la sphere - Norme de la direction => Puissance souhaité
+                //collisions.push_back(i);
+                //std::cout<<"Contact : ("<< ContactPoint.x() <<","<<ContactPoint.y() <<","<<ContactPoint.z() <<")"<<std::endl;
 
-            QVector3D force = ContactPoint-getNode(MAIN_NODE_ID).getTransform().getTranslation(); //ContactPoint-Centre => Direction de propulsion
-            float puissance =(float)getNode(MAIN_NODE_ID).getTransform().getScaling().x() - (float)force.length(); //On calcule avec quelle force repousser le personnage
-            force.normalize();
-            //addTranslation(MAIN_NODE_ID,-force*puissance);
-            force*=(float)puissance * BOUNCE_MODIFIER;
-            //std::cout<<"Force : ("<< force.x() <<","<<force.y() <<","<<force.z() <<")"<<std::endl;
+                //Rayon de la sphere - Norme de la direction => Puissance souhaité
 
-            addForce(MAIN_NODE_ID,-force);
+                QVector3D force = ContactPoint-getNode(MAIN_NODE_ID).getTransform().getTranslation(); //ContactPoint-Centre => Direction de propulsion
+                float puissance =(float)getNode(MAIN_NODE_ID).getTransform().getScaling().x() - (float)force.length(); //On calcule avec quelle force repousser le personnage
+                force.normalize();
+                //addTranslation(MAIN_NODE_ID,-force*puissance);
+                force*=(float)puissance * BOUNCE_MODIFIER;
+                //std::cout<<"Force : ("<< force.x() <<","<<force.y() <<","<<force.z() <<")"<<std::endl;
+
+                addForce(MAIN_NODE_ID,-force);
+            }else{
+                //if trigger box, do not activate forces, only trigger the end of a level
+                respawn();
+            }
         }
     }
 }
@@ -247,7 +253,7 @@ bool SceneGraph::isColliding(int id_a,int id_b,Translation *contactPoint){
             }
             return (C<R);
 
-        }else if(SGN_b.getType()==objectType::CUBE){
+        }else if(SGN_b.getType()==objectType::CUBE || SGN_b.getType()==objectType::TRIGGER){
             //Sphere X Cube
 
             //std::cout<<"<"<<id_a<<","<<id_b<<"> SphereXCube collision"<<std::endl;
@@ -418,4 +424,10 @@ bool SceneGraph::isColliding(int id_a,int id_b,Translation *contactPoint,QVector
         }
     }
     return false;
+}
+
+void SceneGraph::respawn()
+{
+    setTranslation(MAIN_NODE_ID,QVector3D(0.0,2.0,0.0));
+    setVelocity(MAIN_NODE_ID,QVector3D(0.0,0.0,0.0));
 }

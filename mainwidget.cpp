@@ -148,7 +148,8 @@ void MainWidget::keyPressEvent(QKeyEvent *event){
         geometries->setWireframe(false);
         break;
     case Qt::Key_R:
-        scene.setTranslation(MAIN_NODE_ID,QVector3D(0.0,3.0,0.0));
+        //scene.setTranslation(MAIN_NODE_ID,QVector3D(0.0,3.0,0.0));
+        scene.respawn();
         break;
 
     case Qt::Key_Tab:
@@ -209,7 +210,8 @@ void MainWidget::resizeGL(int w, int h)
     //Légèrement modifier la position de caméra
     QMatrix4x4 view;
     view.setToIdentity();
-    view.translate(0.0, -5.0, -10.0);
+    view.translate(5.0, -8.0, -20.0);
+    view.rotate(QQuaternion::fromEulerAngles(20.0,0.0,0.0));
     projection *= view;
 }
 
@@ -253,7 +255,7 @@ void MainWidget::initScene(){
     scene.AddRoot(root,&root); //Item 0 on scene
 
     SceneGraphNode sphere_node = SceneGraphNode(&root, objectType::SPHERE);
-    sphere_node.setTransform(Transform( QVector3D(2.0,1.0,0.0) , QVector3D(1.0,1.0,1.0) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    sphere_node.setTransform(Transform( QVector3D(0.0,2.0,0.0) , QVector3D(1.0,1.0,1.0) , QQuaternion(0.0,0.0,0.0,0.0) ));
     sphere_node.setStatic(false);
     scene.AddNode(sphere_node,&sphere_node); //Item 1 on Scene
 
@@ -363,6 +365,11 @@ void MainWidget::initScene(){
     cube_node37.setTransform(Transform( QVector3D(-20.0,1.5,-32.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
     scene.AddNode(cube_node37,&cube_node37);
 
+    //small obstacle, but still section 3
+    SceneGraphNode obstacle_1 = SceneGraphNode(&root, objectType::CUBE);
+    obstacle_1.setTransform(Transform( QVector3D(-16.0,4.0,-32.0) , QVector3D(1,1,1) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(obstacle_1,&obstacle_1);
+
     SceneGraphNode cube_node38 = SceneGraphNode(&root, objectType::CUBE);
     cube_node38.setTransform(Transform( QVector3D(-12.0,1.5,-32.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
     scene.AddNode(cube_node38,&cube_node38);
@@ -372,6 +379,11 @@ void MainWidget::initScene(){
     SceneGraphNode cube_node40 = SceneGraphNode(&root, objectType::CUBE);
     cube_node40.setTransform(Transform( QVector3D(-4.0,1.5,-32.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
     scene.AddNode(cube_node40,&cube_node40);
+
+    //ending
+    SceneGraphNode cube_ending = SceneGraphNode(&root, objectType::TRIGGER);
+    cube_ending.setTransform(Transform( QVector3D(-4.0,3.5,-32.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_ending,&cube_ending);
 
     //Groupe 4
     SceneGraphNode cube_node22 = SceneGraphNode(&root, objectType::CUBE);
@@ -393,6 +405,11 @@ void MainWidget::initScene(){
     SceneGraphNode cube_node27 = SceneGraphNode(&root, objectType::CUBE);
     cube_node27.setTransform(Transform( QVector3D(4.0, 1.5,-8.0) , QVector3D(2*sqrt(2),0,2) , QQuaternion::fromEulerAngles(0.0,0.0,45.0) ));
     scene.AddNode(cube_node27,&cube_node27);
+
+    //death plane
+    SceneGraphNode death_plane = SceneGraphNode(&root, objectType::TRIGGER);
+    death_plane.setTransform(Transform( QVector3D(0.0,-5.0,0.0) , QVector3D(40,0.5,40) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(death_plane,&death_plane);
 }
 
 

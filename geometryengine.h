@@ -60,7 +60,8 @@
 
 enum objectType {UNDEF=-1,
                  SPHERE,    //0
-                 CUBE};     //1
+                 CUBE,      //1
+                 TRIGGER};
 
 class GeometryEngine : protected QOpenGLFunctions_3_1
 {
