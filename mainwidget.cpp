@@ -408,7 +408,7 @@ void MainWidget::initScene(){
 
     //death plane
     SceneGraphNode death_plane = SceneGraphNode(&root, objectType::TRIGGER);
-    death_plane.setTransform(Transform( QVector3D(0.0,-5.0,0.0) , QVector3D(40,0.5,40) , QQuaternion(0.0,.0,0.0,0.0) ));
+    death_plane.setTransform(Transform( QVector3D(0.0,-5.0,0.0) , QVector3D(40,0.5,60) , QQuaternion(0.0,.0,0.0,0.0) ));
     scene.AddNode(death_plane,&death_plane);
 }
 
