@@ -211,7 +211,7 @@ void MainWidget::initializeGL(){
 void MainWidget::resizeGL(int w, int h)
 {
     qreal aspect = qreal(w) / qreal(h ? h : 1);
-    const qreal zNear = 0.1, zFar = 30.0, fov = 50.0;
+    const qreal zNear = 0.1, zFar = 100.0, fov = 50.0;
     projection.setToIdentity();
     projection.perspective(fov, aspect, zNear, zFar);
 
@@ -262,32 +262,145 @@ void MainWidget::initScene(){
     scene.AddRoot(root,&root); //Item 0 on scene
 
     SceneGraphNode sphere_node = SceneGraphNode(&root, objectType::SPHERE);
-    sphere_node.setTransform(Transform( QVector3D(0.0,3.0,0.0) , QVector3D(1.0,1.0,1.0) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    sphere_node.setTransform(Transform( QVector3D(2.0,1.0,0.0) , QVector3D(1.0,1.0,1.0) , QQuaternion(0.0,0.0,0.0,0.0) ));
     scene.AddNode(sphere_node,&sphere_node); //Item 1 on Scene
     sphere_node.mobile = true;
 
     SceneGraphNode cube_node = SceneGraphNode(&root, objectType::CUBE);
-    cube_node.setTransform(Transform( QVector3D(0.0,0.0,0.0) , QVector3D(2,0.5,2) , QQuaternion().fromEulerAngles(0.0,0.0,15.0) ));
+    cube_node.setTransform(Transform( QVector3D(0.0,-0.5,0.0) , QVector3D(2,0.0,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
     scene.AddNode(cube_node,&cube_node); //Item 2
+    SceneGraphNode cube_node35 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node35.setTransform(Transform( QVector3D(0.0,-0.5,-4.0) , QVector3D(2,0.0,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    scene.AddNode(cube_node35,&cube_node35);
 
-    /*SceneGraphNode sphere_node2 = SceneGraphNode(&sphere_node, objectType::SPHERE);
-    sphere_node2.setTransform(Transform( QVector3D(0.0,-1,0.0) , QVector3D(0.5,0.5,0.5) , QQuaternion(0.0,0.0,0.0,0.0) ));
-    scene.AddNode(sphere_node2,&sphere_node2);*/ //Item 3 on Scene
-
-/*  Level design (caché pour l'instant pour tester la physique)
-    SceneGraphNode cube_node2 = SceneGraphNode(&root, objectType::CUBE);
-    cube_node2.setTransform(Transform( QVector3D(-0.0,0.5,-4.0) , QVector3D(2,1,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
-    scene.AddNode(cube_node2,&cube_node2); //Item 4
-
+  //Level design (caché pour l'instant pour tester la physique)
     SceneGraphNode cube_node3 = SceneGraphNode(&root, objectType::CUBE);
-    cube_node3.setTransform(Transform( QVector3D(4.0,0.5,-4.0) , QVector3D(2,1,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    cube_node3.setTransform(Transform( QVector3D(8.0,1.5,-8.0) , QVector3D(2,2,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
     scene.AddNode(cube_node3,&cube_node3); //Item 5
 
     SceneGraphNode cube_node4 = SceneGraphNode(&root, objectType::CUBE);
-    cube_node4.setTransform(Transform( QVector3D(8.0,0.5,-4.0) , QVector3D(2,1,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    cube_node4.setTransform(Transform( QVector3D(12.0,1.5,-8.0) , QVector3D(2,2,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
     scene.AddNode(cube_node4,&cube_node4); //Item 6
-    */
 
+
+
+    //Group 2
+    SceneGraphNode cube_node8 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node8.setTransform(Transform( QVector3D(-12.0,1.5,-16.0) , QVector3D(2,2,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    scene.AddNode(cube_node8,&cube_node8); //Item 6
+
+    SceneGraphNode cube_node9 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node9.setTransform(Transform( QVector3D(-16.0,1.5,-16.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node9,&cube_node9);
+
+    SceneGraphNode cube_node10 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node10.setTransform(Transform( QVector3D(-16.0,1.5,-12.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node10,&cube_node10);
+
+    SceneGraphNode cube_node11 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node11.setTransform(Transform( QVector3D(-16.0,1.5,-8.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node11,&cube_node11);
+
+    SceneGraphNode cube_node19 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node19.setTransform(Transform( QVector3D(-20.0,1.5,-16.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node19,&cube_node19);
+
+
+    SceneGraphNode cube_node20 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node20.setTransform(Transform( QVector3D(-20.0,1.5,-12.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node20,&cube_node20);
+
+    SceneGraphNode cube_node21 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node21.setTransform(Transform( QVector3D(-20.0,1.5,-8.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node21,&cube_node21);
+
+    SceneGraphNode cube_node28 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node28.setTransform(Transform( QVector3D(-20.0,1.5,-4.0) , QVector3D(2,0,2*sqrt(2.0)) , QQuaternion::fromEulerAngles(45.0,0.0,0.0) ));
+    scene.AddNode(cube_node28,&cube_node28);
+    SceneGraphNode cube_node29 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node29.setTransform(Transform( QVector3D(-16.0,1.5,-4.0) , QVector3D(2,0,2*sqrt(2.0)) , QQuaternion::fromEulerAngles(45.0,0.0,0.0) ));
+    scene.AddNode(cube_node29,&cube_node29);
+
+    SceneGraphNode cube_node30 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node30.setTransform(Transform( QVector3D(-16.0,-0.5,0.0) , QVector3D(2,0,2) , QQuaternion::fromEulerAngles(0.0,0.0,0.0) ));
+    scene.AddNode(cube_node30,&cube_node30);
+    SceneGraphNode cube_node31 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node31.setTransform(Transform( QVector3D(-20.0,-0.5,0.0) , QVector3D(2,0,2) , QQuaternion::fromEulerAngles(0.0,0.0,0.0) ));
+    scene.AddNode(cube_node31,&cube_node31);
+    SceneGraphNode cube_node32 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node32.setTransform(Transform( QVector3D(-12.0,-0.5,0.0) , QVector3D(2,0,2) , QQuaternion::fromEulerAngles(0.0,0.0,0.0) ));
+    scene.AddNode(cube_node32,&cube_node32);
+    SceneGraphNode cube_node33 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node33.setTransform(Transform( QVector3D(-8.0,-0.5,0.0) , QVector3D(2,0,2) , QQuaternion::fromEulerAngles(0.0,0.0,0.0) ));
+    scene.AddNode(cube_node33,&cube_node33);
+    SceneGraphNode cube_node34 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node34.setTransform(Transform( QVector3D(-4.0,-0.5,0.0) , QVector3D(2,0,2) , QQuaternion::fromEulerAngles(0.0,0.0,0.0) ));
+    scene.AddNode(cube_node34,&cube_node34);
+
+
+    //Group 3
+    SceneGraphNode cube_node13 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node13.setTransform(Transform( QVector3D(-16.0,1.5,-20.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node13,&cube_node13);
+
+    SceneGraphNode cube_node14 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node14.setTransform(Transform( QVector3D(-16.0,1.5,-24.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node14,&cube_node14);
+
+    SceneGraphNode cube_node15 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node15.setTransform(Transform( QVector3D(-16.0,1.5,-28.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node15,&cube_node15);
+
+    SceneGraphNode cube_node18 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node18.setTransform(Transform( QVector3D(-20.0,1.5,-28.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node18,&cube_node18);
+
+    SceneGraphNode cube_node16 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node16.setTransform(Transform( QVector3D(-20.0,1.5,-20.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node16,&cube_node16);
+
+    SceneGraphNode cube_node17 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node17.setTransform(Transform( QVector3D(-20.0,1.5,-24.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node17,&cube_node17);
+
+    SceneGraphNode cube_node36 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node36.setTransform(Transform( QVector3D(-16.0,1.5,-32.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node36,&cube_node36);
+
+    SceneGraphNode cube_node37 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node37.setTransform(Transform( QVector3D(-20.0,1.5,-32.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node37,&cube_node37);
+
+    SceneGraphNode cube_node38 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node38.setTransform(Transform( QVector3D(-12.0,1.5,-32.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node38,&cube_node38);
+    SceneGraphNode cube_node39 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node39.setTransform(Transform( QVector3D(-8.0,1.5,-32.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node39,&cube_node39);
+    SceneGraphNode cube_node40 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node40.setTransform(Transform( QVector3D(-4.0,1.5,-32.0) , QVector3D(2,2,2) , QQuaternion(0.0,.0,0.0,0.0) ));
+    scene.AddNode(cube_node40,&cube_node40);
+
+    //Groupe 4
+    SceneGraphNode cube_node22 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node22.setTransform(Transform( QVector3D(0.0,-0.5,-8.0) , QVector3D(2,0,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    scene.AddNode(cube_node22,&cube_node22);
+    SceneGraphNode cube_node23 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node23.setTransform(Transform( QVector3D(0.0,-0.5,-12.0) , QVector3D(2,0,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    scene.AddNode(cube_node23,&cube_node23);
+    SceneGraphNode cube_node24 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node24.setTransform(Transform( QVector3D(0.0,-0.5,-16.0) , QVector3D(2,0,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    scene.AddNode(cube_node24,&cube_node24);
+
+    SceneGraphNode cube_node25 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node25.setTransform(Transform( QVector3D(-8.0,1.5,-16.0) , QVector3D(2*sqrt(2),0,2) , QQuaternion::fromEulerAngles(0.0,0.0,-45.0) ));
+    scene.AddNode(cube_node25,&cube_node25);
+    SceneGraphNode cube_node26 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node26.setTransform(Transform( QVector3D(-4.0,-0.5,-16.0) , QVector3D(2,0,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    scene.AddNode(cube_node26,&cube_node26);
+    SceneGraphNode cube_node27 = SceneGraphNode(&root, objectType::CUBE);
+    cube_node27.setTransform(Transform( QVector3D(4.0, 1.5,-8.0) , QVector3D(2*sqrt(2),0,2) , QQuaternion::fromEulerAngles(0.0,0.0,45.0) ));
+    scene.AddNode(cube_node27,&cube_node27);
 }
 
 
