@@ -138,7 +138,32 @@ void SceneGraph::updateForce(float delta_t){
             if(Velocity.lengthSquared()>VELOCITY_THRESHOLD){
                 QVector3D friction = FRICTION_STRENGTH * Velocity;
                 addVelocity(i,friction * delta_t);
-                //if(getNode(i).velocity)
+                //velocity cap
+                QVector3D player_velocity=getNode(MAIN_NODE_ID).getVelocity();
+                //x
+                if(player_velocity.x()<-VELOCITY_CAP_X){
+                    player_velocity.setX(-VELOCITY_CAP_X);
+                    setVelocity(i,player_velocity);
+                }else if(player_velocity.x()>VELOCITY_CAP_X){
+                    player_velocity.setX(VELOCITY_CAP_X);
+                    setVelocity(i,player_velocity);
+                }
+                //y
+                if(player_velocity.y()<-VELOCITY_CAP_Y){
+                    player_velocity.setY(-VELOCITY_CAP_Y);
+                    setVelocity(i,player_velocity);
+                }else if(player_velocity.y()>VELOCITY_CAP_Y){
+                    player_velocity.setY(VELOCITY_CAP_Y);
+                    setVelocity(i,player_velocity);
+                }
+                //z
+                if(player_velocity.z()<-VELOCITY_CAP_Z){
+                    player_velocity.setZ(-VELOCITY_CAP_Z);
+                    setVelocity(i,player_velocity);
+                }else if(player_velocity.z()>VELOCITY_CAP_Z){
+                    player_velocity.setZ(VELOCITY_CAP_Z);
+                    setVelocity(i,player_velocity);
+                }
 
             }else{
                 setVelocity(i,QVector3D(0.0,0.0,0.0));

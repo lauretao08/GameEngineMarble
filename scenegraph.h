@@ -16,6 +16,9 @@
 #define FRICTION_STRENGTH -0.30
 #define BOUNCE_MODIFIER 0.8
 #define GRAVITY_MODIFIER 2.0
+#define VELOCITY_CAP_X 2.0
+#define VELOCITY_CAP_Y 2.0
+#define VELOCITY_CAP_Z 2.0
 
 
 class SceneGraph{
