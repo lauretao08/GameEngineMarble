@@ -415,8 +415,3 @@ void MainWidget::paintGL()
 }
 
 
-void MainWidget::checkCollision(){
-    scene.manageCollision();
-}
-
-
