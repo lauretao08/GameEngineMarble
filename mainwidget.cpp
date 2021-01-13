@@ -148,7 +148,6 @@ void MainWidget::keyPressEvent(QKeyEvent *event){
         geometries->setWireframe(false);
         break;
     case Qt::Key_R:
-        //scene.setTranslation(MAIN_NODE_ID,QVector3D(0.0,3.0,0.0));
         scene.respawn();
         break;
 
@@ -422,13 +421,11 @@ void MainWidget::paintGL()
     texture_ball->bind(objectType::SPHERE);
     texture_ground->bind(objectType::CUBE);
 
-
-    //std::cout<<"previousTime : " << scene.previousTime << ", currentTime : " << scene.currentTime << ", deltaTime : " << scene.currentTime-scene.previousTime <<std::endl;
     scene.updateCurrentTime();
     scene.manageCollision();
     scene.updateForce(scene.currentTime-scene.previousTime);
     scene.displaySceneElements(&program, geometries ,projection, rotation);
-    //update();
+
 }
 
 

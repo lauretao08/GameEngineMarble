@@ -41,8 +41,7 @@ bool SceneGraphNode::isDrawable() const {return Drawable;}
 bool SceneGraphNode::isCollidable() const {return Collidable;}
 bool SceneGraphNode::isStatic() const{return Static;}
 
-void SceneGraphNode::setStatic(bool s)
-{
+void SceneGraphNode::setStatic(bool s){
     Static = s;
 }
 
@@ -55,8 +54,7 @@ SceneGraphNode *SceneGraphNode::getParent(){
     return parent;
 }
 
-QVector3D SceneGraphNode::getVelocity()
-{
+QVector3D SceneGraphNode::getVelocity(){
     return velocity;
 }
 
@@ -72,7 +70,6 @@ void SceneGraphNode::addTranslate(Translation t){
     transform.addTranslation(t);
 }
 
-void SceneGraphNode::setTranslate(QVector3D translate)
-{
+void SceneGraphNode::setTranslate(QVector3D translate){
     transform.setTranslation(translate);
 }

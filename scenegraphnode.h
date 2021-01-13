@@ -43,10 +43,10 @@ public:
 
     void addTranslate(Translation t);
     void setTranslate(QVector3D translate);
+
     /**Force related**/
     QVector3D velocity = QVector3D(0.0,0.0,0.0);
     QVector3D gravity = QVector3D(0.0,-1.0,0.0);
-    //QVector3D position;
 
 };
 

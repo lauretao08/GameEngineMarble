@@ -77,11 +77,6 @@ public:
     //Those are now just the same thing as drawGeometry
     void drawCubeGeometry   (int bufferID,QOpenGLShaderProgram *program);
     void drawObjGeometry    (int bufferID,QOpenGLShaderProgram *program);
-    //void drawSphereGeometry (int bufferID,QOpenGLShaderProgram *program);
-
-
-    //Depreciated
-    void drawPlaneGeometry(QOpenGLShaderProgram *program, int size);
 
 private:
     QOpenGLBuffer arrayBuf;
@@ -97,8 +92,6 @@ private:
     void initSphereGeometry(int bufferID);
     void initObjGeometry(int bufferID,std::string filename);
 
-    //Depreciated
-    void initPlaneGeometry(int size);
 
    };
 

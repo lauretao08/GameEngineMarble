@@ -102,13 +102,6 @@ private:
     QOpenGLTexture *texture_ground;
     QOpenGLTexture *texture_ball;
 
-    /*
-    QOpenGLTexture *heightMap;
-    QOpenGLTexture *grassTex;
-    QOpenGLTexture *rockTex;
-    QOpenGLTexture *snowTex;
-    */
-
     QMatrix4x4 projection;
 
     QVector2D mousePressPosition;

@@ -199,33 +199,7 @@ void SceneGraph::manageCollision(){
         }
     }
 }
-/*
-bool SceneGraph::predictCollision(QVector3D predicted_force){
-    std::vector<int> collisions;
-    for(int i=0;i<graph.size();i++){
-        Translation ContactPoint=Translation(0.0,0.0,0.0);
-        if(isColliding(MAIN_NODE_ID,i,&ContactPoint,predicted_force)){
-            collisions.push_back(i);
-            //std::cout<<"Contact : ("<< ContactPoint.x() <<","<<ContactPoint.y() <<","<<ContactPoint.z() <<")"<<std::endl;
 
-            //ContactPoint-Centre => Direction de propulsion
-            QVector3D force = ContactPoint-getNode(MAIN_NODE_ID).getTransform().getTranslation();
-            //Rayon de la sphere - Norme de la direction => Puissance souhaité
-            float puissance =(float)getNode(MAIN_NODE_ID).getTransform().getScaling().x() - (float)force.length();
-            force.normalize();
-            //addTranslation(MAIN_NODE_ID,-force*puissance);
-            force*=(float)puissance * BOUNCE_MODIFIER;
-            std::cout<<"PREDICT Force : ("<< force.x() <<","<<force.y() <<","<<force.z() <<")"<<std::endl;
-
-            addForce(MAIN_NODE_ID,-force);
-        }
-    }
-    if(collisions.size()>0){
-        return true;
-    }
-    return false;
-}
-*/
 bool SceneGraph::isColliding(int id_a,int id_b,Translation *contactPoint){
     if(!getNode(id_a).isCollidable() || !getNode(id_b).isCollidable()){
         return false;
@@ -323,104 +297,7 @@ bool SceneGraph::isColliding(int id_a,int id_b,Translation *contactPoint){
         }else if(SGN_b.getType()==objectType::CUBE){
             //Cube X Cube
             //std::cout<<"<"<<id_a<<","<<id_b<<"> CubeXCube collision"<<std::endl;
-            //Todo
-        }
-    }
-    return false;
-}
-
-bool SceneGraph::isColliding(int id_a,int id_b,Translation *contactPoint,QVector3D predictedForce){
-    if(!getNode(id_a).isCollidable() || !getNode(id_b).isCollidable()){
-        return false;
-    }
-    if(id_a == id_b){
-        return false;
-    }
-    SceneGraphNode SGN_a = getNode(id_a);
-    SGN_a.addTranslate(predictedForce);
-    SceneGraphNode SGN_b = getNode(id_b);
-    if(SGN_a.getType()==objectType::SPHERE){
-        if(SGN_b.getType()==objectType::SPHERE){
-            //Sphere X Sphere collision
-
-            //std::cout<<"<"<<id_a<<","<<id_b<<"> SphereXSphere collision"<<std::endl;
-            //Distance between the two centers < 2 radius
-            Translation center_A = SGN_a.getTransform().getTranslation();
-            Translation center_B = SGN_b.getTransform().getTranslation();
-            double C = sqrt( pow( center_A.x()- center_B.x(), 2 ) +
-                         pow( center_A.y()- center_B.y(), 2 ) +
-                         pow( center_A.z()- center_B.z(), 2 ) );
-            double R =  SGN_a.getTransform().getScaling().x() + SGN_b.getTransform().getScaling().x();
-            //std::cout <<"C = "<<C<<"/R = "<<R<<std::endl;
-            if(C<R){
-                *contactPoint=center_B-center_A; //NOT COMPLETE
-            }
-            return (C<R);
-
-        }else if(SGN_b.getType()==objectType::CUBE){
-            //Sphere X Cube
-
-            //std::cout<<"<"<<id_a<<","<<id_b<<"> SphereXCube collision"<<std::endl;
-
-            Translation closestPoint = SGN_b.getTransform().getTranslation();
-            QVector3D direction = SGN_a.getTransform().getTranslation() - closestPoint;
-            QMatrix3x3 rotation = SGN_b.getTransform().getRotationAsMatrix();
-            for (int i = 0; i < 3; ++i) { //Going direction by direction
-                QVector3D axis(rotation(i,0),rotation(i,1),rotation(i,2));
-                float distance = QVector3D::dotProduct(direction, axis);
-                //std::cout<<"Distance"<<distance<<std::endl;
-
-                if (distance > SGN_b.getTransform().getTranslation()[i] + SGN_b.getTransform().getScaling()[i]) {
-                    distance = SGN_b.getTransform().getTranslation()[i] + SGN_b.getTransform().getScaling()[i];
-                }
-                if (distance < -(SGN_b.getTransform().getTranslation()[i] + SGN_b.getTransform().getScaling()[i])) {
-                    distance = -(SGN_b.getTransform().getTranslation()[i] + SGN_b.getTransform().getScaling()[i]);
-                }
-
-                closestPoint = closestPoint + (axis * distance);
-                //std::cout <<"ClosestPoint"<< closestPoint.x() <<","<<closestPoint.y()<<","<<closestPoint.z()<<std::endl;
-            }
-            float distSq = QVector3D::dotProduct(SGN_a.getTransform().getTranslation() - closestPoint,SGN_a.getTransform().getTranslation() - closestPoint);  //Dot product of himself
-            float radiusSq = SGN_a.getTransform().getScaling().x() * SGN_a.getTransform().getScaling().x();
-            //std::cout <<"Dist = "<<distSq<<"/Rad = "<<radiusSq<<std::endl;
-
-            if(distSq < radiusSq){
-                *contactPoint=closestPoint;
-            }
-            return distSq < radiusSq;
-        }
-    }else if(SGN_a.getType()==objectType::CUBE){
-        if(SGN_b.getType()==objectType::SPHERE){
-            //Cube X Sphere
-            //std::cout<<"<"<<id_a<<","<<id_b<<"> CubeXSphere collision"<<std::endl;
-
-            Translation closestPoint = SGN_a.getTransform().getTranslation();
-            QVector3D direction = SGN_b.getTransform().getTranslation() - closestPoint;
-            QMatrix3x3 rotation = SGN_a.getTransform().getRotationAsMatrix();
-            for (int i = 0; i < 3; ++i) { //Going direction by direction
-                QVector3D axis(rotation(i,0),rotation(i,1),rotation(i,2));
-                float distance = QVector3D::dotProduct(direction, axis);
-                //std::cout<<"Distance"<<distance<<std::endl;
-
-                if (distance > SGN_a.getTransform().getTranslation()[i] + SGN_a.getTransform().getScaling()[i]) {
-                    distance = SGN_a.getTransform().getTranslation()[i] + SGN_a.getTransform().getScaling()[i];
-                }
-                if (distance < -(SGN_a.getTransform().getTranslation()[i] + SGN_a.getTransform().getScaling()[i])) {
-                    distance = -(SGN_a.getTransform().getTranslation()[i] + SGN_a.getTransform().getScaling()[i]);
-                }
-
-                closestPoint = closestPoint + (axis * distance);
-                //std::cout <<"ClosestPoint"<< closestPoint.x() <<","<<closestPoint.y()<<","<<closestPoint.z()<<std::endl;
-            }
-            float distSq = QVector3D::dotProduct(SGN_b.getTransform().getTranslation() - closestPoint,SGN_b.getTransform().getTranslation() - closestPoint);  //Dot product of himself
-            float radiusSq = SGN_b.getTransform().getScaling().x() * SGN_b.getTransform().getScaling().x();
-            //std::cout <<"Dist = "<<distSq<<"/Rad = "<<radiusSq<<std::endl;
-            return distSq < radiusSq;
-
-        }else if(SGN_b.getType()==objectType::CUBE){
-            //Cube X Cube
-            //std::cout<<"<"<<id_a<<","<<id_b<<"> CubeXCube collision"<<std::endl;
-            //Todo
+            //Not implemented
         }
     }
     return false;
