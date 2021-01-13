@@ -242,11 +242,11 @@ bool SceneGraph::isColliding(int id_a,int id_b,Translation *contactPoint){
                 float distance = QVector3D::dotProduct(direction, axis);
                 //std::cout<<"Distance"<<distance<<std::endl;
 
-                if (distance > SGN_b.getTransform().getTranslation()[i] + SGN_b.getTransform().getScaling()[i]) {
-                    distance = SGN_b.getTransform().getTranslation()[i] + SGN_b.getTransform().getScaling()[i];
+                if (distance > SGN_b.getTransform().getScaling()[i]) {
+                    distance = SGN_b.getTransform().getScaling()[i];
                 }
-                if (distance < -(SGN_b.getTransform().getTranslation()[i] + SGN_b.getTransform().getScaling()[i])) {
-                    distance = -(SGN_b.getTransform().getTranslation()[i] + SGN_b.getTransform().getScaling()[i]);
+                if (distance < -( SGN_b.getTransform().getScaling()[i])) {
+                    distance = -( SGN_b.getTransform().getScaling()[i]);
                 }
 
                 closestPoint = closestPoint + (axis * distance);
