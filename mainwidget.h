@@ -64,6 +64,7 @@
 #include "scenegraph.h"
 #include <math.h>
 
+
 class GeometryEngine;
 enum ControlMode {BALL_CONTROL,CAM_CONTROL};
 
@@ -89,7 +90,6 @@ protected:
     void initScene();
 
     void paintGL() override;
-    void checkCollision();
 
 
 
@@ -119,9 +119,6 @@ private:
     SceneGraph scene;
 
     ControlMode controlMode;
-
-    float currentTime;
-
 };
 
 #endif // MAINWIDGET_H

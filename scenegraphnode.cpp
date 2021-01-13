@@ -4,7 +4,7 @@ SceneGraphNode::SceneGraphNode(){
     this->type = objectType::UNDEF;
     this->Drawable = false;
     this->Collidable = false;
-    this->mobile = false;
+    this->Static = true;
 }
 
 SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, objectType type){
@@ -15,14 +15,17 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, objectType type){
     default:
         this->Drawable = false;
         this->Collidable = false;
+        this->Static = true;
         break;
     case objectType::SPHERE:
         this->Drawable = true;
         this->Collidable = true;
+        this->Static = true;
         break;
     case objectType::CUBE:
         this->Drawable = true;
         this->Collidable = true;
+        this->Static = true;
         break;
     }
 }
@@ -31,6 +34,12 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, objectType type){
 objectType SceneGraphNode::getType() const{return type;}
 bool SceneGraphNode::isDrawable() const {return Drawable;}
 bool SceneGraphNode::isCollidable() const {return Collidable;}
+bool SceneGraphNode::isStatic() const{return Static;}
+
+void SceneGraphNode::setStatic(bool s)
+{
+    Static = s;
+}
 
 
 Transform SceneGraphNode::getTransform(){
@@ -39,6 +48,11 @@ Transform SceneGraphNode::getTransform(){
 
 SceneGraphNode *SceneGraphNode::getParent(){
     return parent;
+}
+
+QVector3D SceneGraphNode::getVelocity()
+{
+    return velocity;
 }
 
 

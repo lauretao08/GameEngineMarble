@@ -21,6 +21,7 @@ private:
 
     bool Drawable;
     bool Collidable;
+    bool Static;
 
 
 public:
@@ -30,9 +31,12 @@ public:
     objectType getType() const;
     bool isDrawable() const;
     bool isCollidable() const;
+    bool isStatic() const;
+    void setStatic(bool);
 
     Transform getTransform();
     SceneGraphNode *getParent();
+    QVector3D getVelocity();
 
     void setTransform(Transform t);
     void addTransform(Transform t);
@@ -43,7 +47,6 @@ public:
     QVector3D gravity = QVector3D(0.0,-1.0,0.0);
     //QVector3D position;
 
-    bool mobile;
 };
 
 #endif // SCENEGRAPHNODE_H

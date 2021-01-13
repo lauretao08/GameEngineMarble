@@ -15,6 +15,8 @@
 #define VELOCITY_THRESHOLD 0.04
 #define FRICTION_STRENGTH -0.30
 #define BOUNCE_MODIFIER 0.8
+#define GRAVITY_MODIFIER 2.0
+
 
 class SceneGraph{
 private:
@@ -33,6 +35,7 @@ public:
     void AddNode(SceneGraphNode node, SceneGraphNode *addrNode);
 
     SceneGraphNode getNode(int);
+    int getSize();
 
     void addForce(int objectID, QVector3D force);
     void setTranslation(int objectID,Translation translation);
@@ -48,6 +51,7 @@ public:
 
     bool isColliding(int id_a,int id_b,Translation *);
     bool isColliding(int id_a,int id_b,Translation *,QVector3D);
+
     /**Force related**/
     void updateForce(float delta_t);
     void updateCurrentTime(){previousTime=currentTime;currentTime = GetCurrentTime();}

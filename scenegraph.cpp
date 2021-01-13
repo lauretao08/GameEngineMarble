@@ -30,10 +30,14 @@ SceneGraphNode SceneGraph::getNode(int objectID){
     return graph[objectID];
 }
 
+int SceneGraph::getSize()
+{
+    return graph.size();
+}
+
 void SceneGraph::addForce(int objectID, QVector3D force){
 
     graph[objectID].velocity+=force;
-
 }
 
 void SceneGraph::setTranslation(int objectID, QVector3D translation)
@@ -82,14 +86,6 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
 
     QMatrix4x4 matrix;
 
-    /* Calcul dt for update force */
-    /*previousTime = currentTime;
-    currentTime = GetCurrentTime();
-    float delta_t = currentTime - previousTime;
-    std::cout<<"PrviousTime : "<<previousTime<<"   CurrentTime : "<<currentTime<<"   delta_t : "<<delta_t<<std::endl;
-    if(delta_t >0.15f) delta_t = 0.15f; //lock down dt*/
-
-
     while(ongoing){
         matrix.setToIdentity();
         matrix.translate(0.0, 0.0, -5.0);
@@ -99,10 +95,6 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
         matrix.rotate(current.getTransform().getRotation());
         matrix.scale(current.getTransform().getScaling());
 
-        //******** UpdateForce ******
-        //updateForce(matrix, current, delta_t);
-
-        // Set modelview-projection matrix
         program->setUniformValue("mvp_matrix", projection * matrix);
 
         if(current.isDrawable()){
@@ -129,59 +121,54 @@ void SceneGraph::displaySceneElements(QOpenGLShaderProgram *program, GeometryEng
 }
 
 void SceneGraph::updateForce(float delta_t){
-    /* à Mettre à jour les position / velocity
-        p = p + v * dt;
-        v = v + friction * dt + gravity * dt;
-    */
-    //matrix.translate(0.0,0.0,0.0);
-    delta_t/=1000.0;
-    QVector3D delta_p_g = (getNode(MAIN_NODE_ID).velocity + getNode(MAIN_NODE_ID).gravity) * delta_t;
-    QVector3D delta_p = (getNode(MAIN_NODE_ID).velocity ) * delta_t;
-    //std::cout<<"Delta p  : ("<<delta_p.x()<<","<<delta_p.y()<<","<<delta_p.z()<<")"<<std::endl;
-    //std::cout<<"Velocity : ("<< getNode(MAIN_NODE_ID).velocity.x()<<","<< getNode(MAIN_NODE_ID).velocity.y()<<","<< getNode(MAIN_NODE_ID).velocity.z()<<")"<<std::endl;
-    //std::cout<<delta_t<<std::endl;
-    //matrix.translate(delta_p);
-    //getNode(MAIN_NODE_ID).getTransform().addTranslation(delta_p);
-    /*if(predictCollision(delta_p_g)){
 
-    }else{
-        addTranslation(MAIN_NODE_ID,delta_p_g);
-    }*/
-    addTranslation(MAIN_NODE_ID,delta_p_g);
-   //**** Mettre à jour la vitesse ****
-   if(getNode(MAIN_NODE_ID).velocity.lengthSquared()>VELOCITY_THRESHOLD){
-       QVector3D friction = FRICTION_STRENGTH * getNode(MAIN_NODE_ID).velocity;
-       addVelocity(MAIN_NODE_ID,friction * delta_t);
-   }else{
-       setVelocity(MAIN_NODE_ID,QVector3D(0.0,0.0,0.0));
-   }
+    for(int i=0;i<this->getSize();i++){
+        if(!getNode(i).isStatic()){
+            delta_t/=1000.0;
+            QVector3D delta_p = delta_t * (getNode(i).velocity + (getNode(i).gravity * GRAVITY_MODIFIER));
+            //std::cout<<"Delta p  : ("<<delta_p.x()<<","<<delta_p.y()<<","<<delta_p.z()<<")"<<std::endl;
+            //std::cout<<"Velocity : ("<< getNode(MAIN_NODE_ID).velocity.x()<<","<< getNode(MAIN_NODE_ID).velocity.y()<<","<< getNode(MAIN_NODE_ID).velocity.z()<<")"<<std::endl;
+            //std::cout<<delta_t<<std::endl;
 
+            //Application du déplacement calculé
+            addTranslation(i,delta_p);
 
+            //Application de la force comme vitesse pour l'objet ****
+            QVector3D Velocity=getNode(i).getVelocity();
+            if(Velocity.lengthSquared()>VELOCITY_THRESHOLD){
+                QVector3D friction = FRICTION_STRENGTH * Velocity;
+                addVelocity(i,friction * delta_t);
+                //if(getNode(i).velocity)
 
+            }else{
+                setVelocity(i,QVector3D(0.0,0.0,0.0));
+            }
+        }
+    }
 }
 
 void SceneGraph::manageCollision(){
-    std::vector<int> collisions;
-    for(int i=0;i<graph.size();i++){
+    //std::vector<int> collisions;
+    for(int i=0;i<graph.size();i++){//Pour chaque objet de la scene
         Translation ContactPoint=Translation(0.0,0.0,0.0);
-        if(isColliding(MAIN_NODE_ID,i,&ContactPoint)){
-            collisions.push_back(i);
+        if(isColliding(MAIN_NODE_ID,i,&ContactPoint)){      //Si l'ojet rentre en collision avec la sphere personnage
+            //collisions.push_back(i);
             //std::cout<<"Contact : ("<< ContactPoint.x() <<","<<ContactPoint.y() <<","<<ContactPoint.z() <<")"<<std::endl;
 
-            //ContactPoint-Centre => Direction de propulsion
-            QVector3D force = ContactPoint-getNode(MAIN_NODE_ID).getTransform().getTranslation();
             //Rayon de la sphere - Norme de la direction => Puissance souhaité
-            float puissance =(float)getNode(MAIN_NODE_ID).getTransform().getScaling().x() - (float)force.length();
+
+            QVector3D force = ContactPoint-getNode(MAIN_NODE_ID).getTransform().getTranslation(); //ContactPoint-Centre => Direction de propulsion
+            float puissance =(float)getNode(MAIN_NODE_ID).getTransform().getScaling().x() - (float)force.length(); //On calcule avec quelle force repousser le personnage
             force.normalize();
-            addTranslation(MAIN_NODE_ID,-force*puissance);
+            //addTranslation(MAIN_NODE_ID,-force*puissance);
             force*=(float)puissance * BOUNCE_MODIFIER;
-            std::cout<<"Force : ("<< force.x() <<","<<force.y() <<","<<force.z() <<")"<<std::endl;
+            //std::cout<<"Force : ("<< force.x() <<","<<force.y() <<","<<force.z() <<")"<<std::endl;
 
             addForce(MAIN_NODE_ID,-force);
         }
     }
 }
-
+/*
 bool SceneGraph::predictCollision(QVector3D predicted_force){
     std::vector<int> collisions;
     for(int i=0;i<graph.size();i++){
@@ -207,7 +194,7 @@ bool SceneGraph::predictCollision(QVector3D predicted_force){
     }
     return false;
 }
-
+*/
 bool SceneGraph::isColliding(int id_a,int id_b,Translation *contactPoint){
     if(!getNode(id_a).isCollidable() || !getNode(id_b).isCollidable()){
         return false;
@@ -251,7 +238,7 @@ bool SceneGraph::isColliding(int id_a,int id_b,Translation *contactPoint){
                                     axis = QVector3D(rotation(i,0),-rotation(i,1),rotation(i,2));
                                 else
                                     axis = QVector3D(rotation(i,0),rotation(i,1),-rotation(i,2));
-                                std::cout<<"Contact "<<i <<" : ("<< axis.x() <<","<<axis.y() <<","<<axis.z() <<")"<<std::endl;
+                                //std::cout<<"Contact "<<i <<" : ("<< axis.x() <<","<<axis.y() <<","<<axis.z() <<")"<<std::endl;
                 float distance = QVector3D::dotProduct(direction, axis);
                 //std::cout<<"Distance"<<distance<<std::endl;
 

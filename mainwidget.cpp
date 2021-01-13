@@ -112,34 +112,25 @@ void MainWidget::timerEvent(QTimerEvent *)
 
 void MainWidget::keyPressEvent(QKeyEvent *event){
     QVector3D input(0.0f,0.0f,0.0f);
-    QVector3D force(0.0,0.0,0.0);
     switch(event->key()){
     case Qt::Key_Z :
     case Qt::Key_Up :
         input+=QVector3D(0.0f,0.0f,1.0/16.0);
-        force+=QVector3D(0.0,0.0,1.0);
-        std::cout<<"HAUT"<<std::endl;
         break;
 
     case Qt::Key_S :
     case Qt::Key_Down :
         input+=QVector3D(0.0f,0.0f,-1.0/16.0);
-        force+=QVector3D(0.0,0.0,-1.0);
-        std::cout<<"BAS"<<std::endl;
         break;
 
     case Qt::Key_Q :
     case Qt::Key_Left :
         input+=QVector3D(1.0/16.0,0.0f,0.0f);
-        force+=QVector3D(1.0,0.0,0.0);
-        std::cout<<"GAUCHE"<<std::endl;
         break;
 
     case Qt::Key_D :
     case Qt::Key_Right :
         input+=QVector3D(-1.0/16.0,0.0f,0.0f);
-        force+=QVector3D(-1.0,0.0,0.0);
-        std::cout<<"DROITE"<<std::endl;
         break;
 
     case Qt::Key_Shift  :
@@ -182,7 +173,7 @@ void MainWidget::keyPressEvent(QKeyEvent *event){
         break;
     case ControlMode::BALL_CONTROL:
         //scene.addTranslation(MAIN_NODE_ID,-input);
-        scene.addForce(MAIN_NODE_ID, -force);
+        scene.addForce(MAIN_NODE_ID, -input*16);
         break;
     default:
         std::cout<<"[mainwidget.cpp/keyPressEvent]Warning, Unknown Control Mode"<<std::endl;
@@ -263,8 +254,9 @@ void MainWidget::initScene(){
 
     SceneGraphNode sphere_node = SceneGraphNode(&root, objectType::SPHERE);
     sphere_node.setTransform(Transform( QVector3D(2.0,1.0,0.0) , QVector3D(1.0,1.0,1.0) , QQuaternion(0.0,0.0,0.0,0.0) ));
+    sphere_node.setStatic(false);
     scene.AddNode(sphere_node,&sphere_node); //Item 1 on Scene
-    sphere_node.mobile = true;
+
 
     SceneGraphNode cube_node = SceneGraphNode(&root, objectType::CUBE);
     cube_node.setTransform(Transform( QVector3D(0.0,-0.5,0.0) , QVector3D(2,0.0,2) , QQuaternion(0.0,0.0,0.0,0.0) ));
@@ -415,8 +407,8 @@ void MainWidget::paintGL()
 
 
     //std::cout<<"previousTime : " << scene.previousTime << ", currentTime : " << scene.currentTime << ", deltaTime : " << scene.currentTime-scene.previousTime <<std::endl;
-    scene.manageCollision();
     scene.updateCurrentTime();
+    scene.manageCollision();
     scene.updateForce(scene.currentTime-scene.previousTime);
     scene.displaySceneElements(&program, geometries ,projection, rotation);
     //update();
