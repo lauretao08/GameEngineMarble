@@ -58,6 +58,8 @@
 #include <vector>
 #include <math.h>
 
+#define M_PI 3.14159265
+
 enum objectType {UNDEF=-1,
                  SPHERE,    //0
                  CUBE,      //1
